@@ -1,0 +1,542 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. TP.
+     
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+        SELECT NOV-TIMES1    ASSIGN TO DISK
+                            ORGANIZATION IS LINE SEQUENTIAL
+                            FILE STATUS IS NOV-TIMES1-ESTADO.
+        SELECT NOV-TIMES2    ASSIGN TO DISK
+                              ORGANIZATION IS LINE SEQUENTIAL
+                              FILE STATUS IS NOV-TIMES2-ESTADO.
+        SELECT NOV-TIMES3    ASSIGN TO DISK
+                              ORGANIZATION IS LINE SEQUENTIAL
+                              FILE STATUS IS NOV-TIMES3-ESTADO.
+        SELECT CONSULTORES    ASSIGN TO DISK
+                              ORGANIZATION IS LINE SEQUENTIAL
+                              FILE STATUS IS CONS-ESTADO.
+        SELECT EMPRESAS    ASSIGN TO DISK
+                          ORGANIZATION IS LINE SEQUENTIAL
+                          FILE STATUS IS EMPRESAS-ESTADO.
+        SELECT CATEGORIAS    ASSIGN TO DISK
+                              ORGANIZATION IS LINE SEQUENTIAL
+                              FILE STATUS IS CATEGORIAS-ESTADO.
+        SELECT TIM ASSIGN TO PRINTER "TIMES.DAT".
+        SELECT LISTADO ASSIGN TO PRINTER "LISTADO.DAT".
+
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD TIM     LABEL RECORD OMITTED.
+       01 LINEA PIC X(24).
+
+       FD LISTADO     LABEL RECORD OMITTED.
+       01 LINEA-LISTADO PIC X(70).
+
+       FD NOV-TIMES1     LABEL RECORD IS STANDARD
+                        VALUE OF FILE-ID IS "NOVUNO.DAT".
+       01 REG-NOV-TIMES1.
+            03 NOV-TIMES1-NUMERO    PIC X(5).
+            03 NOV-TIMES1-FECHA.
+                05 NOV-TIMES1-ANIO    PIC 9(4).
+                05 NOV-TIMES1-MES    PIC 9(2).
+                05 NOV-TIMES1-DIA    PIC 9(2).
+            03 NOV-TIMES1-EMPRESA    PIC 9(3).
+            03 NOV-TIMES1-TAREA        PIC X(4).
+            03 NOV-TIMES1-HORAS        PIC 9(2)V99.
+            
+       FD NOV-TIMES2     LABEL RECORD IS STANDARD
+                        VALUE OF FILE-ID IS "NOV2.DAT".
+       01 REG-NOV-TIMES2.
+        03 NOV-TIMES2-NUMERO    PIC X(5).
+          03 NOV-TIMES2-FECHA.
+                05 NOV-TIMES2-ANIO    PIC 9(4).
+                05 NOV-TIMES2-MES    PIC 9(2).
+                05 NOV-TIMES2-DIA    PIC 9(2).
+          03 NOV-TIMES2-EMPRESA    PIC 9(3).
+          03 NOV-TIMES2-TAREA        PIC X(4).
+          03 NOV-TIMES2-HORAS        PIC 9(2)V99.
+
+       FD NOV-TIMES3     LABEL RECORD IS STANDARD
+                      VALUE OF FILE-ID IS "NOV3.DAT".
+       01 REG-NOV-TIMES3.
+          03 NOV-TIMES3-NUMERO    PIC X(5).
+          03 NOV-TIMES3-FECHA.
+                05 NOV-TIMES3-ANIO    PIC 9(4).
+                05 NOV-TIMES3-MES    PIC 9(2).
+                05 NOV-TIMES3-DIA    PIC 9(2).
+          03 NOV-TIMES3-EMPRESA    PIC 9(3).
+          03 NOV-TIMES3-TAREA        PIC X(4).
+          03 NOV-TIMES3-HORAS        PIC 9(2)V99.
+
+       FD CONSULTORES     LABEL RECORD IS STANDARD
+                      VALUE OF FILE-ID IS "CONSULTORES.DAT".
+       01 REG-CONSULTORES.
+          03 CONS-NUMERO    PIC X(5).
+          03 CONS-DNI    PIC 9(8).
+          03 CONS-SRT       PIC X(2).
+          03 CONS-NOMBRE        PIC X(25).
+          03 CONS-DIRE        PIC X(20).
+          03 CONS-TEL        PIC X(20).
+
+       FD EMPRESAS     LABEL RECORD IS STANDARD
+                      VALUE OF FILE-ID IS "EMPRESAS.DAT".
+       01 REG-EMPRESAS.
+          03 EMP-EMPRESA    PIC 9(3).
+          03 EMP-RAZON        PIC X(25).
+          03 EMP-DIRE        PIC X(20).
+          03 EMP-TEL        PIC X(20).
+          03 EMP-CUIT    PIC 9(11).
+
+       FD CATEGORIAS     LABEL RECORD IS STANDARD
+                      VALUE OF FILE-ID IS "CATEGORIAS.DAT".
+       01 REG-CATEGORIAS.
+          03 CAT-SRT        PIC X(2).
+          03 CAT-DESC        PIC X(20).
+          03 CAT-TARIFA    PIC 9(5)V99.
+
+       WORKING-STORAGE SECTION.
+       77 NOV-TIMES1-ESTADO PIC XX.
+       77 NOV-TIMES2-ESTADO PIC XX.
+       77 NOV-TIMES3-ESTADO PIC XX.
+       77 CONS-ESTADO PIC XX.
+       77 TIMES-ESTADO PIC XX.
+       77 EMPRESAS-ESTADO PIC XX.
+       77 CATEGORIAS-ESTADO PIC XX.
+       77 EOF-NOVTIMES1 PIC XX VALUE "NO".
+            88 EOF-NOV-TIMES1 VALUE "SI".
+       77 EOF-NOVTIMES2 PIC XX VALUE "NO".
+            88 EOF-NOV-TIMES2 VALUE "SI".
+       77 EOF-NOVTIMES3 PIC XX VALUE "NO".
+            88 EOF-NOV-TIMES3 VALUE "SI".
+       77 EOF-CONS PIC XX VALUE "NO".
+            88 EOF-CONSULTORES VALUE "SI".
+       77 EOF-TIM PIC XX VALUE "NO".
+            88 EOF-TIMES VALUE "SI".
+       77 EOF-EMP PIC XX VALUE "NO".
+            88 EOF-EMPRESAS VALUE "SI".
+       77 EOF-CAT PIC XX VALUE "NO".
+            88 EOF-CATEGORIAS VALUE "SI".
+       
+       01 CLAVE-NOV-TIMES1.
+            03 CLAVE-NOV-TIMES1-NUMERO     PIC 9(5).
+            03 CLAVE-NOV-TIMES1-FECHA    PIC 9(8).
+       01 CLAVE-NOV-TIMES2.
+            03 CLAVE-NOV-TIMES2-NUMERO     PIC 9(5).
+            03 CLAVE-NOV-TIMES2-FECHA    PIC 9(8).
+       01 CLAVE-NOV-TIMES3.
+            03 CLAVE-NOV-TIMES3-NUMERO     PIC 9(5).
+            03 CLAVE-NOV-TIMES3-FECHA    PIC 9(8).
+       01 MENOR-CLAVE.
+            03 MENOR-CLAVE-NUMERO     PIC 9(5).
+            03 MENOR-CLAVE-FECHA    PIC 9(8).
+
+       01 LINEA-A-ESCRIBIR PIC 9(2) VALUE 1.
+       01 HORAS-TOTALES PIC 9(2)V99.
+       01 HORAS-TOTALES-POR-CONSULTOR PIC 9(2)V99.
+       01 HORAS-POR-FECHA PIC 9(2)V99.
+       01 CONSULTOR-ANTERIOR PIC X(5) VALUE '     '.
+       01 IMPORTE PIC 9(7)V99.
+       01 IMPORTE-GRAL PIC 9(7)V99 VALUE 0.
+       01  WS-CURRENT-DATE-FIELDS.
+           05  WS-CURRENT-DATE.
+               10 WS-CURRENT-YEAR     PIC X(04).
+               10 WS-CURRENT-MONTH    PIC X(02).
+               10 WS-CURRENT-DAY     PIC X(02).
+           05  WS-CURRENT-TIME.
+               10 WS-CURRENT-HOUR     PIC  9(2).
+               10  WS-CURRENT-MINUTE  PIC  9(2).
+               10  WS-CURRENT-SECOND  PIC  9(2).
+               10  WS-CURRENT-MS      PIC  9(2).
+               10  WS-GMT-SIGN        PIC X(01).
+               10  WS-GMT-TIME        PIC X(04).
+
+
+       01 SUBINDICE PIC 9(2) VALUE 1.
+       01 TABLA-CATEGORIAS.
+           02 TAB-CATEGORIAS OCCURS 30 TIMES INDEXED BY INDICE.
+               03 TAB-CAT-SRT PIC X(2).
+               03 TAB-CAT-DESC PIC X(20).
+               03 TAB-CAT-TARIFA PIC 9(5)V99.
+       01 TABLA-EMPRESAS.
+           02 TAB-EMPRESAS OCCURS 100 TIMES INDEXED BY EMP-INDICE.
+               03 TAB-EMP-EMPRESA PIC 9(3).
+               03 TAB-EMP-RAZON PIC X(25).
+               03 TAB-EMP-DIRE PIC X(20).
+               03 TAB-EMP-TEL PIC X(20).
+               03 TAB-EMP-CUIT PIC 9(11).
+
+       01 ENCABEZADO.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 DIA PIC X(2).
+           03 FILLER PIC X VALUE '/'.
+           03 MES PIC X(2).
+           03 FILLER PIC X VALUE '/'.
+           03 ANIO PIC X(4).
+           03 FILLER PIC X(41) VALUE SPACES.
+           03 FILLER PIC X(5) VALUE 'HOJA '.
+           03 HOJA PIC 9(3) VALUE 1.
+       01 LINEA-VACIA.
+           03 FILLER PIC X(70) VALUE SPACES.
+       01 DATOS-CONSULTOR.
+           03 PRIMER-DATO.
+               05 FILLER PIC X(1) VALUE SPACES.
+               05 FILLER PIC X(11) VALUE 'CONSULTOR: '.
+               05 DATO-NUMERO PIC X(5).
+               05 FILLER PIC X(5) VALUE SPACES.
+               05 FILLER PIC X(8) VALUE 'NOMBRE: '.
+               05 DATO-NOMBRE PIC X(25).
+      *         05 FILLER PIC X(5).
+           03 SEGUNDO-DATO.
+               05 FILLER PIC X(22) VALUE SPACES.
+               05 FILLER PIC X(11) VALUE 'CATEGORIA: '.
+               05 DATO-CATEGORIA PIC X(20).
+           03 TERCER-DATO.
+               05 FILLER PIC X(22).
+               05 FILLER PIC X(8) VALUE 'TARIFA: '.
+               05 DISPLAY-TARIFA PIC ZZZZZ.99.
+               05 FILLER PIC X(35) VALUE SPACES.
+               05 DATO-TARIFA PIC 9(5)V99.
+       01 ENCABEZADO-TABLA.
+           03 FILLER PIC X(30) VALUE ' FECHA      EMPRESA      RAZON'.
+           03 FILLER PIC X(32) VALUE ' SOCIAL                HORAS    '.
+           03 FILLER PIC X(8) VALUE 'IMPORTE '.
+       01 BARRA.
+           03 FILLER PIC X(70) VALUE ALL "-".
+       01 LINEA-DATOS-CONS.
+           03 DATOS-CONS-FECHA.
+               05 DATOS-CONS-DIA PIC 9(2).
+               05 FILLER PIC X(1) VALUE '/'.
+               05 DATOS-CONS-MES PIC 9(2).
+               05 FILLER PIC X(1) VALUE '/'.
+               05 DATOS-CONS-ANIO PIC 9(4).
+               05 FILLER PIC X(1) VALUE ' '.
+           03 FILLER PIC X(4) VALUE SPACES.
+           03 DATOS-CONS-EMPRESA PIC 9(3).
+           03 FILLER PIC X(5) VALUE '     '.
+           03 DATOS-CONS-RAZON PIC X(25).
+           03 FILLER PIC X(5) VALUE SPACES.
+           03 DISPLAY-CONS-HORAS PIC ZZ.99.
+           03 FILLER PIC X(2) VALUE SPACES.
+           03 DISPLAY-CONS-IMPORTE PIC ZZZZZZZ.99.
+           03 FILLER PIC X(3) VALUE SPACES.
+           03 DATOS-CONS-HORAS PIC 9(2)V99.
+           03 DATOS-CONS-IMPORTE PIC 9(7)V99.
+       01 LINEA-TOTAL-POR-FECHA.
+           03 FILLER PIC X(18) VALUE 'TOTALES POR FECHA:'.
+           03 FILLER PIC X(34) VALUE SPACES.
+           03 DISPLAY-TOTAL-POR-FECHA-HORAS PIC ZZZ.99.
+           03 FILLER PIC X(2) VALUE SPACES.
+           03 DISPLAY-TOTAL-POR-FECHA-IMPORTE PIC ZZZZZZZ.99.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 DATO-TOTAL-POR-FECHA-HORAS PIC 9(3)V99.
+           03 DATO-TOTAL-POR-FECHA-IMPORTE PIC 9(7)V99.
+       01 LINEA-TOTAL-POR-CONSULTOR.
+           03 FILLER PIC X(22) VALUE 'TOTALES POR CONSULTOR:'.
+           03 FILLER PIC X(29) VALUE SPACES.
+           03 DISPLAY-TOTAL-POR-CONS-HORAS PIC ZZZZ.99.
+           03 FILLER PIC X(1) VALUE ' '.
+           03 DISPLAY-TOTAL-POR-CONS-IMPORTE PIC ZZZZZZZZ.99.
+           03 DATO-TOTAL-POR-CONS-HORAS PIC 9(4)V99.
+           03 DATO-TOTAL-POR-CONS-IMPORTE PIC 9(8)V99.
+       01 LINEA-TOTAL-GRAL.
+           03 FILLER PIC X(14) VALUE 'TOTAL GENERAL:'.
+           03 FILLER PIC X(45) VALUE SPACES.
+           03 DISPLAY-TOTAL-GRAL-IMPORTE PIC ZZZZZZZZ.99.
+           03 DATO-TOTAL-GRAL-IMPORTE PIC 9(9)V99.
+
+
+
+
+       PROCEDURE DIVISION.
+       COMIENZO.
+            DISPLAY 'Hola mundo'.
+            PERFORM INICIO.
+            PERFORM LEER-NOV-TIMES1.
+            PERFORM LEER-NOV-TIMES2.
+            PERFORM LEER-NOV-TIMES3.
+            PERFORM LEER-CONSULTORES.
+            PERFORM LEER-EMPRESAS.
+            PERFORM LEER-CATEGORIAS.
+            PERFORM CARGAR-TABLAS.
+            MOVE 0 TO HORAS-TOTALES.
+            PERFORM ESCRIBIR-ENCABEZADO.
+            PERFORM PROCESAR-ARCHIVOS UNTIL EOF-NOV-TIMES1
+            AND EOF-NOV-TIMES2 AND EOF-NOV-TIMES3.
+            MOVE IMPORTE-GRAL TO DATO-TOTAL-GRAL-IMPORTE
+            MOVE DATO-TOTAL-GRAL-IMPORTE TO DISPLAY-TOTAL-GRAL-IMPORTE.
+            WRITE LINEA-LISTADO FROM LINEA-TOTAL-GRAL.
+            PERFORM CERRAR-NOVEDADES.
+            STOP RUN.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       INICIO.
+        OPEN INPUT NOV-TIMES1.
+        OPEN INPUT NOV-TIMES2.
+        OPEN INPUT NOV-TIMES3.
+        OPEN INPUT CONSULTORES.
+        OPEN INPUT EMPRESAS.
+        OPEN INPUT CATEGORIAS.
+        OPEN OUTPUT TIM.
+        OPEN OUTPUT LISTADO.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       CERRAR-NOVEDADES.
+        CLOSE NOV-TIMES1.
+        CLOSE NOV-TIMES2.
+        CLOSE NOV-TIMES3.
+        CLOSE CONSULTORES.
+        CLOSE EMPRESAS.
+        CLOSE CATEGORIAS.
+        CLOSE TIM.
+        CLOSE LISTADO.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       CARGAR-TABLAS.
+        PERFORM CARGAR-CATEGORIAS UNTIL EOF-CATEGORIAS.
+        MOVE 1 TO SUBINDICE.
+        PERFORM CARGAR-EMPRESAS UNTIL EOF-EMPRESAS.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       CARGAR-CATEGORIAS.
+        MOVE CAT-SRT TO TAB-CAT-SRT(SUBINDICE).
+        MOVE CAT-DESC  TO TAB-CAT-DESC(SUBINDICE).
+        MOVE CAT-TARIFA TO TAB-CAT-TARIFA(SUBINDICE).
+        ADD 1 TO SUBINDICE.
+        PERFORM LEER-CATEGORIAS.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       CARGAR-EMPRESAS.
+        MOVE EMP-EMPRESA TO TAB-EMP-EMPRESA(SUBINDICE).
+        MOVE EMP-RAZON TO TAB-EMP-RAZON(SUBINDICE).
+        MOVE EMP-DIRE TO TAB-EMP-DIRE(SUBINDICE).
+        MOVE EMP-TEL TO TAB-EMP-TEL(SUBINDICE).
+        MOVE EMP-CUIT TO TAB-EMP-CUIT(SUBINDICE).
+        ADD 1 TO SUBINDICE.
+        PERFORM LEER-EMPRESAS.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-NOV-TIMES1.
+        READ NOV-TIMES1
+            AT END MOVE "SI" TO EOF-NOVTIMES1.
+        MOVE NOV-TIMES1-FECHA TO CLAVE-NOV-TIMES1-FECHA.
+        MOVE NOV-TIMES1-NUMERO TO CLAVE-NOV-TIMES1-NUMERO.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-NOV-TIMES2.
+        READ NOV-TIMES2
+            AT END MOVE "SI" TO EOF-NOVTIMES2.
+        MOVE NOV-TIMES2-NUMERO TO CLAVE-NOV-TIMES2-NUMERO.
+        MOVE NOV-TIMES2-FECHA TO CLAVE-NOV-TIMES2-FECHA.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-NOV-TIMES3.
+        READ NOV-TIMES3
+            AT END MOVE "SI" TO EOF-NOVTIMES3.
+        MOVE NOV-TIMES3-NUMERO TO CLAVE-NOV-TIMES3-NUMERO.
+        MOVE NOV-TIMES3-FECHA TO CLAVE-NOV-TIMES3-FECHA.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-CONSULTORES.
+        READ CONSULTORES AT END MOVE "SI" TO EOF-CONS.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-EMPRESAS.
+        READ EMPRESAS AT END MOVE "SI" TO EOF-EMP.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-CATEGORIAS.
+        READ CATEGORIAS AT END MOVE "SI" TO EOF-CAT.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PROCESAR-ARCHIVOS.
+        MOVE 0 TO HORAS-TOTALES-POR-CONSULTOR.
+        PERFORM PROCESAR-CONSULTOR UNTIL EOF-NOV-TIMES1
+            AND EOF-NOV-TIMES2 AND EOF-NOV-TIMES3
+            OR (CONS-NUMERO NOT EQUAL NOV-TIMES1-NUMERO
+           AND CONS-NUMERO NOT EQUAL NOV-TIMES2-NUMERO
+           AND CONS-NUMERO NOT EQUAL NOV-TIMES3-NUMERO).
+        SET INDICE TO 1.
+
+        ADD HORAS-TOTALES-POR-CONSULTOR TO HORAS-TOTALES.
+        MOVE HORAS-TOTALES TO DATO-TOTAL-POR-CONS-HORAS.
+        COMPUTE IMPORTE = HORAS-TOTALES*DATO-TARIFA.
+        MOVE IMPORTE TO DATO-TOTAL-POR-CONS-IMPORTE.
+        DISPLAY 'IMPORTE TOTAL: ', DATO-TOTAL-POR-CONS-IMPORTE.
+        ADD IMPORTE TO IMPORTE-GRAL.
+        IF LINEA-A-ESCRIBIR > 60 THEN
+            PERFORM SALTO-DE-PAGINA.
+        MOVE DATO-TOTAL-POR-CONS-HORAS TO DISPLAY-TOTAL-POR-CONS-HORAS.
+        MOVE DATO-TOTAL-POR-CONS-IMPORTE
+        TO DISPLAY-TOTAL-POR-CONS-IMPORTE.
+        WRITE LINEA-LISTADO FROM LINEA-TOTAL-POR-CONSULTOR.
+      *  DISPLAY 'LINEA TOTAL POR CONS, LINEA: ', LINEA-A-ESCRIBIR.
+        PERFORM SALTO-DE-PAGINA.
+        PERFORM LEER-CONSULTORES.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       ESCRIBIR-DATOS-CONSULTOR.
+        MOVE CONS-NUMERO TO DATO-NUMERO.
+        MOVE CONS-NOMBRE TO DATO-NOMBRE.
+        MOVE TAB-CAT-DESC(INDICE) TO DATO-CATEGORIA.
+        MOVE TAB-CAT-TARIFA(INDICE) TO DATO-TARIFA.
+        DISPLAY 'TARIFA: ',DATO-TARIFA.
+        WRITE LINEA-LISTADO FROM PRIMER-DATO.
+        WRITE LINEA-LISTADO FROM SEGUNDO-DATO.
+        MOVE DATO-TARIFA TO DISPLAY-TARIFA.
+        WRITE LINEA-LISTADO FROM TERCER-DATO.
+        ADD 3 TO LINEA-A-ESCRIBIR.
+      *  PERFORM UNTIL LINEA-A-ESCRIBIR = 50
+      *      WRITE LINEA-LISTADO FROM LINEA-VACIA
+      *      ADD 1 TO LINEA-A-ESCRIBIR
+      *  END-PERFORM.
+      *  DISPLAY 'DATOS CONSULTOR, LINEA: ', LINEA-A-ESCRIBIR.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PROCESAR-CONSULTOR.
+        IF CONSULTOR-ANTERIOR NOT EQUAL CONS-NUMERO THEN
+           SEARCH TAB-CATEGORIAS
+           AT END DISPLAY 'CATEGORIA NO ENCONTRADA'
+           WHEN TAB-CAT-SRT(INDICE) EQUAL CONS-SRT
+           PERFORM ESCRIBIR-DATOS-CONSULTOR
+           END-SEARCH
+           MOVE CONS-NUMERO TO CONSULTOR-ANTERIOR.
+
+        MOVE 0 TO HORAS-POR-FECHA.
+        PERFORM DETERMINAR-MENOR-CLAVE.
+
+        WRITE LINEA-LISTADO FROM LINEA-VACIA.
+        IF LINEA-A-ESCRIBIR > 56 THEN
+            PERFORM SALTO-DE-PAGINA.
+        WRITE LINEA-LISTADO FROM BARRA.
+        WRITE LINEA-LISTADO FROM ENCABEZADO-TABLA.
+        WRITE LINEA-LISTADO FROM BARRA.
+        ADD 4 TO LINEA-A-ESCRIBIR
+        DISPLAY 'ENCABEZADO DE TABLA, LINEA: ', LINEA-A-ESCRIBIR.
+        PERFORM PROCESAR-NOV-TIMES1
+            UNTIL MENOR-CLAVE NOT EQUAL CLAVE-NOV-TIMES1
+            OR EOF-NOV-TIMES1.
+        PERFORM PROCESAR-NOV-TIMES2
+            UNTIL MENOR-CLAVE NOT EQUAL CLAVE-NOV-TIMES2
+            OR EOF-NOV-TIMES2.
+        PERFORM PROCESAR-NOV-TIMES3
+            UNTIL MENOR-CLAVE NOT EQUAL CLAVE-NOV-TIMES3
+            OR EOF-NOV-TIMES3.
+        IF EOF-NOV-TIMES1 THEN
+            MOVE 9999999999999 TO CLAVE-NOV-TIMES1.
+        IF EOF-NOV-TIMES2 THEN
+            MOVE 9999999999999 TO CLAVE-NOV-TIMES2.
+        IF EOF-NOV-TIMES3 THEN
+            MOVE 9999999999999 TO CLAVE-NOV-TIMES3.
+        ADD HORAS-POR-FECHA TO HORAS-TOTALES.
+        MOVE HORAS-POR-FECHA TO DATO-TOTAL-POR-FECHA-HORAS.
+        COMPUTE IMPORTE = DATO-TARIFA*HORAS-POR-FECHA.
+        MOVE IMPORTE TO DATO-TOTAL-POR-FECHA-IMPORTE.
+        IF LINEA-A-ESCRIBIR > 60 THEN
+            PERFORM SALTO-DE-PAGINA.
+        MOVE DATO-TOTAL-POR-FECHA-HORAS
+        TO DISPLAY-TOTAL-POR-FECHA-HORAS.
+        MOVE DATO-TOTAL-POR-FECHA-IMPORTE
+        TO DISPLAY-TOTAL-POR-FECHA-IMPORTE.
+        WRITE LINEA-LISTADO FROM LINEA-TOTAL-POR-FECHA.
+
+        DISPLAY 'LINEA TOTAL POR FECHA, LINEA: ', LINEA-A-ESCRIBIR.
+        ADD 1 TO LINEA-A-ESCRIBIR.
+
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       DETERMINAR-MENOR-CLAVE.
+        MOVE CLAVE-NOV-TIMES1 TO MENOR-CLAVE.
+        IF CLAVE-NOV-TIMES2 < MENOR-CLAVE THEN
+            MOVE CLAVE-NOV-TIMES2 TO MENOR-CLAVE.
+        IF CLAVE-NOV-TIMES3 < MENOR-CLAVE THEN
+            MOVE CLAVE-NOV-TIMES3 TO MENOR-CLAVE.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PROCESAR-NOV-TIMES1.
+        WRITE LINEA FROM REG-NOV-TIMES1.
+        MOVE NOV-TIMES1-DIA TO DATOS-CONS-DIA.
+        MOVE NOV-TIMES1-MES TO DATOS-CONS-MES.
+        MOVE NOV-TIMES1-ANIO TO DATOS-CONS-ANIO.
+        MOVE NOV-TIMES1-HORAS TO DATOS-CONS-HORAS.
+        SET EMP-INDICE TO 1.
+        SEARCH TAB-EMPRESAS
+           AT END DISPLAY 'EMPRESA NO ENCONTRADA'
+           WHEN TAB-EMP-EMPRESA(EMP-INDICE) EQUAL NOV-TIMES1-EMPRESA
+           PERFORM ESCRIBIR-DATOS-POR-FECHA
+           END-SEARCH
+        MOVE CONS-NUMERO TO CONSULTOR-ANTERIOR.
+        ADD NOV-TIMES1-HORAS TO HORAS-POR-FECHA.
+        PERFORM LEER-NOV-TIMES1.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PROCESAR-NOV-TIMES2.
+        WRITE LINEA FROM REG-NOV-TIMES2.
+        MOVE NOV-TIMES2-DIA TO DATOS-CONS-DIA.
+        MOVE NOV-TIMES2-MES TO DATOS-CONS-MES.
+        MOVE NOV-TIMES2-ANIO TO DATOS-CONS-ANIO.
+        MOVE NOV-TIMES2-HORAS TO DATOS-CONS-HORAS.
+        SET EMP-INDICE TO 1.
+        SEARCH TAB-EMPRESAS
+           AT END DISPLAY 'EMPRESA NO ENCONTRADA'
+           WHEN TAB-EMP-EMPRESA(EMP-INDICE) EQUAL NOV-TIMES2-EMPRESA
+           PERFORM ESCRIBIR-DATOS-POR-FECHA
+           END-SEARCH
+           MOVE CONS-NUMERO TO CONSULTOR-ANTERIOR.
+        ADD NOV-TIMES2-HORAS TO HORAS-POR-FECHA.
+        PERFORM LEER-NOV-TIMES2.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PROCESAR-NOV-TIMES3.
+        WRITE LINEA FROM REG-NOV-TIMES3.
+        MOVE NOV-TIMES3-DIA TO DATOS-CONS-DIA.
+        MOVE NOV-TIMES3-MES TO DATOS-CONS-MES.
+        MOVE NOV-TIMES3-ANIO TO DATOS-CONS-ANIO.
+        MOVE NOV-TIMES3-HORAS TO DATOS-CONS-HORAS.
+        SET EMP-INDICE TO 1.
+        SEARCH TAB-EMPRESAS
+           AT END DISPLAY 'EMPRESA NO ENCONTRADA'
+           WHEN TAB-EMP-EMPRESA(EMP-INDICE) EQUAL NOV-TIMES3-EMPRESA
+           PERFORM ESCRIBIR-DATOS-POR-FECHA
+           END-SEARCH
+           MOVE CONS-NUMERO TO CONSULTOR-ANTERIOR.
+        ADD NOV-TIMES3-HORAS TO HORAS-POR-FECHA.
+        PERFORM LEER-NOV-TIMES3.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       ESCRIBIR-DATOS-POR-FECHA.
+        COMPUTE IMPORTE = DATOS-CONS-HORAS * TAB-CAT-TARIFA(INDICE).
+        MOVE IMPORTE TO DATOS-CONS-IMPORTE.
+        DISPLAY 'IMPORTE X FECHA: ', DATOS-CONS-IMPORTE.
+        MOVE TAB-EMP-RAZON(EMP-INDICE) TO DATOS-CONS-RAZON.
+        MOVE TAB-EMP-EMPRESA(EMP-INDICE) TO DATOS-CONS-EMPRESA.
+        IF LINEA-A-ESCRIBIR > 60 THEN
+            PERFORM SALTO-DE-PAGINA.
+        MOVE DATOS-CONS-HORAS TO DISPLAY-CONS-HORAS.
+        MOVE DATOS-CONS-IMPORTE TO DISPLAY-CONS-IMPORTE.
+        WRITE LINEA-LISTADO FROM LINEA-DATOS-CONS.
+        ADD 1 TO LINEA-A-ESCRIBIR.
+      *  DISPLAY 'LINEA DE FECHA, LINEA: ', LINEA-A-ESCRIBIR.
+
+       ESCRIBIR-ENCABEZADO.
+        MOVE FUNCTION CURRENT-DATE TO WS-CURRENT-DATE-FIELDS.
+        MOVE WS-CURRENT-YEAR TO ANIO.
+        MOVE WS-CURRENT-MONTH TO MES.
+        MOVE WS-CURRENT-DAY TO DIA.
+        MOVE 1 TO LINEA-A-ESCRIBIR.
+        WRITE LINEA-LISTADO FROM BARRA.
+        WRITE LINEA-LISTADO FROM ENCABEZADO.
+        WRITE LINEA-LISTADO FROM LINEA-VACIA.
+        ADD 3 TO LINEA-A-ESCRIBIR.
+
+       SALTO-DE-PAGINA.
+      *  DISPLAY LINEA-A-ESCRIBIR.
+        PERFORM UNTIL LINEA-A-ESCRIBIR EQUAL 61
+            WRITE LINEA-LISTADO FROM LINEA-VACIA
+            ADD 1 TO LINEA-A-ESCRIBIR
+        END-PERFORM.
+        ADD 1 TO HOJA.
+        PERFORM ESCRIBIR-ENCABEZADO.
+
+       END PROGRAM TP.
