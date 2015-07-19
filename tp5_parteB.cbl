@@ -95,9 +95,9 @@
            02 T-MESES OCCURS 12 TIMES INDEXED BY INDICE-MES.
                03 T-MES PIC 9(3).
 
-      
 
-     
+
+
 
 
 
