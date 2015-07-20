@@ -18,8 +18,6 @@
        FILE SECTION.
       *-----------------------
        WORKING-STORAGE SECTION.
-       01 WS-TABLE.
-           05 WS-A PIC A(10) VALUE 'TUTORIALS' OCCURS 5 TIMES.
 
        01 WS-COUNTER PIC 99 VALUE 0.
        01 WS-AUX PIC 99 VALUE 0.
