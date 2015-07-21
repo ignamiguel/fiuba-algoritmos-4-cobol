@@ -39,7 +39,7 @@
        FD EMPRESAS     LABEL RECORD IS STANDARD
                        VALUE OF FILE-ID IS "EMPRESAS.DAT".
        01 REG-EMPRESAS.
-          03 EMP-EMPRESA    PIC 9(3).
+          03 EMP-EMPRESA    PIC A(3).
           03 EMP-RAZON        PIC X(25).
           03 EMP-DIRE        PIC X(20).
           03 EMP-TEL        PIC X(20).
@@ -85,16 +85,18 @@
        01 WS-COUNTER PIC 99 VALUE 0.
        01 WS-AUX PIC 99 VALUE 0.
        01 WS-AUX-2 PIC 99 VALUE 0.
+       01 CANT-EMP PIC 99 VALUE 0.
 
        01 WS-REGISTER.
-           05 WS-COMPANY OCCURS 10 TIMES.
-               10 WS-COMPANY-CODE PIC 9(3).
+           05 WS-COMPANY OCCURS 10 TIMES INDEXED BY I.
+               10 WS-COMPANY-CODE PIC A(3).
                10 WS-COMPANY-NAME PIC A(20).
-               10 WS-YEAR OCCURS 5 TIMES.
-                   15 WS-YEAR-NAME PIC A(20).
-                   15 WS-MONTHS OCCURS 12 TIMES.
+               10 WS-YEAR OCCURS 5 TIMES INDEXED BY J.
+                   15 WS-YEAR-NAME PIC 9(4).
+                   15 WS-MONTHS OCCURS 12 TIMES INDEXED BY K.
                        20 WS-MONTH-NAME PIC A(15).
-                       20 WS-MONTH-HOURS PIC S999.
+                       20 WS-MONTH-NUMBER PIC 9(2).
+                       20 WS-MONTH-HOURS PIC 9(4)V99.
 
 
        PROCEDURE DIVISION.
@@ -104,7 +106,7 @@
        PERFORM INICIO.
        PERFORM CARGAR-TABLAS.
        PERFORM CARGAR-DATOS.
-      * PERFORM PRINT-TABLE.
+       PERFORM PRINT-TABLE.
        PERFORM FIN.
 
        STOP RUN.
@@ -121,30 +123,22 @@
        CARGAR-TABLAS.
            PERFORM LEER-EMPRESAS.
            MOVE 1 TO SUBINDICE.
-           PERFORM CARGAR-EMPRESAS UNTIL (EOF-EMP='SI').
+           PERFORM CARGAR-EMPRESAS UNTIL EOF-EMPRESAS.
 
        CARGAR-EMPRESAS.
            MOVE EMP-EMPRESA TO WS-COMPANY-CODE(SUBINDICE).
            MOVE EMP-RAZON TO WS-COMPANY-NAME(SUBINDICE).
+      *    DISPLAY WS-COMPANY-CODE(SUBINDICE).
            PERFORM LOAD-YEARS.
            PERFORM LOAD-YEAR-MONTH.
-           ADD  1 TO SUBINDICE.
+           ADD 1 TO SUBINDICE.
+           ADD 1 TO CANT-EMP.
            PERFORM LEER-EMPRESAS.
 
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        LEER-EMPRESAS.
            READ EMPRESAS AT END MOVE 'SI' TO EOF-EMP.
-      *-----------------------------------------------------------*
-      *-----------------------------------------------------------*
-
-      *-----------------------------------------------------------*
-      *-----------------------------------------------------------*
-       LEER-TIMES.
-           READ ACT-TIMES
-               AT END MOVE 'SI' TO EOF-TIM.
-      *     MOVE ACT-TIMES-FECHA TO CLAVE-ACT-TIMES-FECHA.
-      *    MOVE ACT-TIMES-NUMERO TO CLAVE-ACT-TIMES-NUMERO.
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
 
@@ -172,40 +166,78 @@
            MOVE 'OCTUBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,10).
            MOVE 'NOVIEMBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,11).
            MOVE 'DICIEMBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,12).
+           MOVE '01' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,1).
+           MOVE '02' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,2).
+           MOVE '03' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,3).
+           MOVE '04' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,4).
+           MOVE '05' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,5).
+           MOVE '06' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,6).
+           MOVE '07' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,7).
+           MOVE '08' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,8).
+           MOVE '09' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,9).
+           MOVE '10' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,10).
+           MOVE '11' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,11).
+           MOVE '12' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,12).
 
            ADD 1 TO WS-AUX.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-TIMES.
+           READ ACT-TIMES
+               AT END MOVE 'SI' TO EOF-TIM.
+      *     MOVE ACT-TIMES-FECHA TO CLAVE-ACT-TIMES-FECHA.
+      *    MOVE ACT-TIMES-NUMERO TO CLAVE-ACT-TIMES-NUMERO.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
 
        CARGAR-DATOS.
            PERFORM LEER-TIMES.
-           PERFORM CARGAR-DAT0-TABLA UNTIL (EOF-TIM='SI').
+           PERFORM CARGAR-DAT0-TABLA UNTIL EOF-TIMES.
+
 
        CARGAR-DAT0-TABLA.
-          DISPLAY SUBINDICE.
-          MOVE 1 TO SUBINDICE.
-          PERFORM BC UNTIL ACT-TIMES-EMPRESA=WS-COMPANY-CODE(SUBINDICE).
-          DISPLAY SUBINDICE.
-          PERFORM LEER-TIMES.
+      *     DISPLAY ACT-TIMES-EMPRESA.
+           SET I TO 1.
+      *     DISPLAY WS-COMPANY-CODE(I).
+           SEARCH WS-COMPANY
+               AT END DISPLAY 'EMPRESA NO ENCONTRADA'
 
-       BC.
-          ADD 1 TO SUBINDICE.
+           WHEN WS-COMPANY-CODE(I)=ACT-TIMES-EMPRESA
+               PERFORM CARGAR-DATO-FECHA
+          END-SEARCH.
+           PERFORM LEER-TIMES.
 
-      * PROCESAR-EMPRESAS
-      *  SEARCH TAB-EMPRESAS
-      *     AT END DISPLAY 'EMPRESA NO ENCONTRADA'
-      *     WHEN TAB-EMP-EMPRESA(EMP-INDICE) EQUAL ACT-TIMES-EMPRESA
-      *     PERFORM ACTUALIZAR-TABLA-HORAS.
-      *     END-SEARCH
-      *  PERFORM LEER-TIMES.
+       CARGAR-DATO-FECHA.
+      *    DISPLAY ACT-TIMES-FECHA.
+           SET J TO 1.
+           SEARCH WS-YEAR
+               AT END DISPLAY 'FECHA NO ENCONTRADA'
 
-      * ACTUALIZAR-TABLA-HORAS.
-      *  COMPUTE INDICE = ACT-TIMES-ANIO - 2010.
-      *  TAB
+           WHEN WS-YEAR-NAME(I,J)=ACT-TIMES-ANIO
+               PERFORM CARGAR-DATO-MES
+          END-SEARCH.
 
+       CARGAR-DATO-MES.
+      *     DISPLAY ACT-TIMES-MES.
+           SET K TO 1.
+           SEARCH WS-MONTHS
+               AT END DISPLAY 'MES NO ENCONTRADO'
+
+           WHEN WS-MONTH-NUMBER(I,J,K)=ACT-TIMES-MES
+               PERFORM INSERTAR-DATO
+          END-SEARCH.
+
+       INSERTAR-DATO.
+      *     DISPLAY ACT-TIMES-HORAS.
+           ADD ACT-TIMES-HORAS TO WS-MONTH-HOURS(I,J,K).
+
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
        PRINT-TABLE.
            MOVE 1 TO WS-COUNTER.
-           PERFORM PRINT-COMAPNY WITH TEST AFTER UNTIL WS-COUNTER > 10.
+           PERFORM PRINT-CMPNY UNTIL WS-COUNTER > CANT-EMP.
 
-       PRINT-COMAPNY.
+       PRINT-CMPNY.
            DISPLAY WS-COMPANY-NAME(WS-COUNTER).
            MOVE 1 TO WS-AUX.
            PERFORM PRINT-YEAR WITH TEST AFTER UNTIL WS-AUX > 5.
@@ -222,7 +254,8 @@
 
 
        PRINT-SINGLE-MONTH.
-           DISPLAY '       'WS-MONTHS(WS-COUNTER,WS-AUX,WS-AUX-2).
+           DISPLAY '       'WS-MONTH-NAME(WS-COUNTER,WS-AUX,WS-AUX-2)
+               ' 'WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2).
            ADD 1 TO WS-AUX-2.
 
        FIN.
