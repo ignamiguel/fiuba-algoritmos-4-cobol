@@ -1,0 +1,431 @@
+       IDENTIFICATION DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       PROGRAM-ID. TP.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+      *-----------------------
+
+       FILE-CONTROL.
+        SELECT ACT-TIMES     ASSIGN TO DISK
+                             ORGANIZATION IS LINE SEQUENTIAL
+                             FILE STATUS IS ACT-TIMES-ESTADO.
+        SELECT EMPRESAS  ASSIGN TO DISK
+                           ORGANIZATION IS LINE SEQUENTIAL.
+
+
+        SELECT LISTADO-ESTAD ASSIGN TO PRINTER "OUTPUT-ESTADISTICO.DAT".
+
+       DATA DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       FILE SECTION.
+      *-----------------------
+
+       FD LISTADO-ESTAD     LABEL RECORD OMITTED.
+       01 LINEA-LISTADO PIC X(87).
+
+       FD ACT-TIMES     LABEL RECORD IS STANDARD
+                        VALUE OF FILE-ID IS "TIMES.DAT".
+       01 REG-ACT-TIMES.
+            03 ACT-TIMES-NUMERO    PIC X(5).
+            03 ACT-TIMES-FECHA.
+                05 ACT-TIMES-ANIO    PIC 9(4).
+                05 ACT-TIMES-MES    PIC 9(2).
+                05 ACT-TIMES-DIA    PIC 9(2).
+            03 ACT-TIMES-EMPRESA    PIC 9(3).
+            03 ACT-TIMES-TAREA        PIC X(4).
+            03 ACT-TIMES-HORAS        PIC 9(2)V99.
+
+       FD EMPRESAS     LABEL RECORD IS STANDARD
+                       VALUE OF FILE-ID IS "EMPRESAS.DAT".
+       01 REG-EMPRESAS.
+          03 EMP-EMPRESA    PIC A(3).
+          03 EMP-RAZON        PIC X(25).
+          03 EMP-DIRE        PIC X(20).
+          03 EMP-TEL        PIC X(20).
+          03 EMP-CUIT    PIC 9(11).
+
+
+       WORKING-STORAGE SECTION.
+
+       77 ACT-TIMES-ESTADO PIC XX.
+       77 EMPRESAS-ESTADO PIC XX.
+
+       77 EOF-TIM PIC XX VALUE "NO".
+            88 EOF-TIMES VALUE "SI".
+       77 EOF-EMP PIC XX VALUE "NO".
+            88 EOF-EMPRESAS VALUE "SI".
+
+       01 LINEA-A-ESCRIBIR PIC 9(2) VALUE 1.
+       01 ENCABEZADO.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 DIA PIC X(2).
+           03 FILLER PIC X VALUE '/'.
+           03 MES PIC X(2).
+           03 FILLER PIC X VALUE '/'.
+           03 ANIO PIC X(4).
+           03 FILLER PIC X(51) VALUE SPACES.
+           03 FILLER PIC X(5) VALUE 'HOJA '.
+           03 HOJA PIC 9(3) VALUE 1.
+       01 LINEA-VACIA.
+           03 FILLER PIC X(87) VALUE SPACES.
+       01 ENCABEZADO-TABLA.
+           03 FILLER PIC X(32) VALUE '  EMPRESA                       '.
+           03 FILLER PIC X(32) VALUE 'ENE FEB MAR ABR MAY JUN JUL AGO'.
+           03 FILLER PIC X(23) VALUE 'SEP OCT NOV DIC TOTAL '.
+       01 LINEA-BARRA.
+           03 FILLER PIC X(87) VALUE ALL "-".
+       01 LINEA-DATOS.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-NOMBRE-EMPRESA PIC X(25).
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-ANIO PIC X(4).
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-ENERO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-FEBRERO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-MARZO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-ABRIL PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-MAYO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-JUNIO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-JULIO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-AGOSTO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-SEPTIEMBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-OCTUBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-NOVIEMBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-DICIEMBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL PIC 999.
+       01 LINEA-TOTALES.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 FILLER PIC X(7) VALUE "TOTALES".
+           03 FILLER PIC X(24) VALUE SPACES.
+           03 LINEA-TOTAL-ENERO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-FEBRERO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-MARZO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-ABRIL PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-MAYO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-JUNIO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-JULIO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-AGOSTO PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-SEPTIEMBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-OCTUBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-NOVIEMBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-DICIEMBRE PIC 999.
+           03 FILLER PIC X(1) VALUE SPACES.
+           03 LINEA-TOTAL-TOTAL PIC 999.
+
+       01  WS-CURRENT-DATE-FIELDS.
+           05  WS-CURRENT-DATE.
+               10 WS-CURRENT-YEAR     PIC X(04).
+               10 WS-CURRENT-MONTH    PIC X(02).
+               10 WS-CURRENT-DAY     PIC X(02).
+           05  WS-CURRENT-TIME.
+               10 WS-CURRENT-HOUR     PIC  9(2).
+               10  WS-CURRENT-MINUTE  PIC  9(2).
+               10  WS-CURRENT-SECOND  PIC  9(2).
+               10  WS-CURRENT-MS      PIC  9(2).
+               10  WS-GMT-SIGN        PIC X(01).
+               10  WS-GMT-TIME        PIC X(04).
+
+
+       01 SUBINDICE PIC 9(2) VALUE 1.
+
+       01 WS-COUNTER PIC 99 VALUE 0.
+       01 WS-AUX PIC 99 VALUE 0.
+       01 WS-AUX-2 PIC 99 VALUE 0.
+       01 CANT-EMP PIC 99 VALUE 0.
+
+       01 WS-REGISTER.
+           05 WS-COMPANY OCCURS 10 TIMES INDEXED BY I.
+               10 WS-COMPANY-CODE PIC A(3).
+               10 WS-COMPANY-NAME PIC A(20).
+               10 WS-YEAR OCCURS 5 TIMES INDEXED BY J.
+                   15 WS-YEAR-NAME PIC 9(4).
+                   15 WS-MONTHS OCCURS 12 TIMES INDEXED BY K.
+                       20 WS-MONTH-NAME PIC A(15).
+                       20 WS-MONTH-NUMBER PIC 9(2).
+                       20 WS-MONTH-HOURS PIC 9(4)V99.
+
+
+       PROCEDURE DIVISION.
+      *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+       COMIENZO.
+
+       PERFORM INICIO.
+       PERFORM CARGAR-TABLAS.
+       PERFORM CARGAR-DATOS.
+       PERFORM PRINT-TABLE.
+       PERFORM FIN.
+
+       STOP RUN.
+
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       INICIO.
+           OPEN INPUT EMPRESAS.
+           OPEN INPUT ACT-TIMES.
+           OPEN OUTPUT LISTADO-ESTAD.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+
+       CARGAR-TABLAS.
+           PERFORM LEER-EMPRESAS.
+           MOVE 1 TO SUBINDICE.
+           PERFORM CARGAR-EMPRESAS UNTIL EOF-EMPRESAS.
+
+       CARGAR-EMPRESAS.
+           MOVE EMP-EMPRESA TO WS-COMPANY-CODE(SUBINDICE).
+           MOVE EMP-RAZON TO WS-COMPANY-NAME(SUBINDICE).
+      *    DISPLAY WS-COMPANY-CODE(SUBINDICE).
+           PERFORM LOAD-YEARS.
+           PERFORM LOAD-YEAR-MONTH.
+           ADD 1 TO SUBINDICE.
+           ADD 1 TO CANT-EMP.
+           PERFORM LEER-EMPRESAS.
+
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-EMPRESAS.
+           READ EMPRESAS AT END MOVE 'SI' TO EOF-EMP.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+
+       LOAD-YEARS.
+           MOVE '2011' TO WS-YEAR-NAME(SUBINDICE,1).
+           MOVE '2012' TO WS-YEAR-NAME(SUBINDICE,2).
+           MOVE '2013' TO WS-YEAR-NAME(SUBINDICE,3).
+           MOVE '2014' TO WS-YEAR-NAME(SUBINDICE,4).
+           MOVE '2015' TO WS-YEAR-NAME(SUBINDICE,5).
+
+       LOAD-YEAR-MONTH.
+           MOVE 1 TO WS-AUX.
+           PERFORM LOAD-MONTHS UNTIL WS-AUX > 5.
+
+       LOAD-MONTHS.
+           MOVE 'ENERO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,1).
+           MOVE 'FEBRERO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,2).
+           MOVE 'MARZO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,3).
+           MOVE 'ABRIL' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,4).
+           MOVE 'MAYO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,5).
+           MOVE 'JUNIO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,6).
+           MOVE 'JULIO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,7).
+           MOVE 'AGOSTO' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,8).
+           MOVE 'SEPTIEMBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,9).
+           MOVE 'OCTUBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,10).
+           MOVE 'NOVIEMBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,11).
+           MOVE 'DICIEMBRE' TO WS-MONTH-NAME(SUBINDICE,WS-AUX,12).
+           MOVE '01' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,1).
+           MOVE '02' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,2).
+           MOVE '03' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,3).
+           MOVE '04' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,4).
+           MOVE '05' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,5).
+           MOVE '06' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,6).
+           MOVE '07' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,7).
+           MOVE '08' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,8).
+           MOVE '09' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,9).
+           MOVE '10' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,10).
+           MOVE '11' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,11).
+           MOVE '12' TO WS-MONTH-NUMBER(SUBINDICE,WS-AUX,12).
+
+           ADD 1 TO WS-AUX.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       LEER-TIMES.
+           READ ACT-TIMES
+               AT END MOVE 'SI' TO EOF-TIM.
+      *     MOVE ACT-TIMES-FECHA TO CLAVE-ACT-TIMES-FECHA.
+      *    MOVE ACT-TIMES-NUMERO TO CLAVE-ACT-TIMES-NUMERO.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+
+       CARGAR-DATOS.
+           PERFORM LEER-TIMES.
+           PERFORM CARGAR-DAT0-TABLA UNTIL EOF-TIMES.
+
+
+       CARGAR-DAT0-TABLA.
+      *     DISPLAY ACT-TIMES-EMPRESA.
+           SET I TO 1.
+      *     DISPLAY WS-COMPANY-CODE(I).
+           SEARCH WS-COMPANY
+               AT END DISPLAY 'EMPRESA NO ENCONTRADA'
+
+           WHEN WS-COMPANY-CODE(I)=ACT-TIMES-EMPRESA
+               PERFORM CARGAR-DATO-FECHA
+          END-SEARCH.
+           PERFORM LEER-TIMES.
+
+       CARGAR-DATO-FECHA.
+      *    DISPLAY ACT-TIMES-FECHA.
+           SET J TO 1.
+           SEARCH WS-YEAR
+               AT END DISPLAY 'FECHA NO ENCONTRADA'
+
+           WHEN WS-YEAR-NAME(I,J)=ACT-TIMES-ANIO
+               PERFORM CARGAR-DATO-MES
+          END-SEARCH.
+
+       CARGAR-DATO-MES.
+      *     DISPLAY ACT-TIMES-MES.
+           SET K TO 1.
+           SEARCH WS-MONTHS
+               AT END DISPLAY 'MES NO ENCONTRADO'
+
+           WHEN WS-MONTH-NUMBER(I,J,K)=ACT-TIMES-MES
+               PERFORM INSERTAR-DATO
+          END-SEARCH.
+
+       INSERTAR-DATO.
+           ADD ACT-TIMES-HORAS TO WS-MONTH-HOURS(I,J,K).
+      *     DISPLAY WS-MONTH-HOURS(I,J,K).
+
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PRINT-TABLE.
+           PERFORM ESCRIBIR-ENCABEZADO.
+           MOVE 1 TO WS-COUNTER.
+           PERFORM PRINT-CMPNY UNTIL WS-COUNTER > CANT-EMP.
+           IF LINEA-A-ESCRIBIR >= 30 THEN
+               PERFORM SALTO-DE-PAGINA.
+           WRITE LINEA-LISTADO FROM LINEA-BARRA.
+           WRITE LINEA-LISTADO FROM LINEA-TOTALES.
+           ADD 2 TO LINEA-A-ESCRIBIR.
+
+       PRINT-CMPNY.
+           IF LINEA-A-ESCRIBIR >= 29 THEN
+               PERFORM SALTO-DE-PAGINA.
+           WRITE LINEA-LISTADO FROM ENCABEZADO-TABLA.
+           WRITE LINEA-LISTADO FROM LINEA-BARRA.
+           ADD 2 TO LINEA-A-ESCRIBIR.
+           DISPLAY WS-COMPANY-NAME(WS-COUNTER).
+           MOVE WS-COMPANY-NAME(WS-COUNTER) TO LINEA-NOMBRE-EMPRESA.
+           MOVE 1 TO WS-AUX.
+           PERFORM PRINT-YEAR WITH TEST AFTER UNTIL WS-AUX > 5.
+           IF LINEA-A-ESCRIBIR >= 31 THEN
+               PERFORM SALTO-DE-PAGINA.
+           WRITE LINEA-LISTADO FROM LINEA-VACIA.
+           ADD 1 TO LINEA-A-ESCRIBIR.
+           ADD 1 TO WS-COUNTER.
+
+       PRINT-YEAR.
+           DISPLAY '   'WS-YEAR-NAME(WS-COUNTER,WS-AUX).
+           MOVE WS-YEAR-NAME(WS-COUNTER,WS-AUX) TO LINEA-ANIO.
+           PERFORM PRINT-MONTHS.
+           ADD 1 TO WS-AUX.
+
+       PRINT-MONTHS.
+           MOVE 1 TO WS-AUX-2.
+           MOVE 0 TO LINEA-TOTAL.
+           PERFORM PRINT-SINGLE-MONTH UNTIL WS-AUX-2 > 12.
+           IF LINEA-A-ESCRIBIR >= 31 THEN
+               PERFORM SALTO-DE-PAGINA.
+           WRITE LINEA-LISTADO FROM LINEA-DATOS.
+           ADD LINEA-TOTAL TO LINEA-TOTAL-TOTAL.
+           ADD 1 TO LINEA-A-ESCRIBIR.
+           MOVE SPACES TO LINEA-NOMBRE-EMPRESA.
+
+
+       PRINT-SINGLE-MONTH.
+           DISPLAY '       'WS-MONTH-NAME(WS-COUNTER,WS-AUX,WS-AUX-2)
+               ' 'WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2).
+           EVALUATE WS-AUX-2
+           WHEN 1
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-ENERO
+               ADD LINEA-ENERO TO LINEA-TOTAL-ENERO
+           WHEN 2
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-FEBRERO
+               ADD LINEA-FEBRERO TO LINEA-TOTAL-FEBRERO
+           WHEN 3
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-MARZO
+               ADD LINEA-MARZO TO LINEA-TOTAL-MARZO
+           WHEN 4
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-ABRIL
+               ADD LINEA-ABRIL TO LINEA-TOTAL-ABRIL
+           WHEN 5
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-MAYO
+               ADD LINEA-MAYO TO LINEA-TOTAL-MAYO
+           WHEN 6
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-JUNIO
+               ADD LINEA-JUNIO TO LINEA-TOTAL-JUNIO
+           WHEN 7
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-JULIO
+               ADD LINEA-JULIO TO LINEA-TOTAL-JULIO
+           WHEN 8
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-AGOSTO
+               ADD LINEA-AGOSTO TO LINEA-TOTAL-AGOSTO
+           WHEN 9
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-SEPTIEMBRE
+               ADD LINEA-SEPTIEMBRE TO LINEA-TOTAL-SEPTIEMBRE
+           WHEN 10
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-OCTUBRE
+               ADD LINEA-OCTUBRE TO LINEA-TOTAL-OCTUBRE
+           WHEN 11
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-NOVIEMBRE
+               ADD LINEA-NOVIEMBRE TO LINEA-TOTAL-NOVIEMBRE
+           WHEN 12
+               MOVE WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+               TO LINEA-DICIEMBRE.
+               ADD LINEA-DICIEMBRE TO LINEA-TOTAL-DICIEMBRE
+           ADD WS-MONTH-HOURS(WS-COUNTER,WS-AUX,WS-AUX-2)
+           TO LINEA-TOTAL.
+           ADD 1 TO WS-AUX-2.
+
+       ESCRIBIR-ENCABEZADO.
+        MOVE FUNCTION CURRENT-DATE TO WS-CURRENT-DATE-FIELDS.
+        MOVE WS-CURRENT-YEAR TO ANIO.
+        MOVE WS-CURRENT-MONTH TO MES.
+        MOVE WS-CURRENT-DAY TO DIA.
+        MOVE 1 TO LINEA-A-ESCRIBIR.
+        WRITE LINEA-LISTADO FROM LINEA-BARRA.
+        WRITE LINEA-LISTADO FROM ENCABEZADO.
+        WRITE LINEA-LISTADO FROM LINEA-VACIA.
+        ADD 3 TO LINEA-A-ESCRIBIR.
+
+       SALTO-DE-PAGINA.
+      *  DISPLAY LINEA-A-ESCRIBIR.
+        PERFORM UNTIL LINEA-A-ESCRIBIR EQUAL 31
+            WRITE LINEA-LISTADO FROM LINEA-VACIA
+            ADD 1 TO LINEA-A-ESCRIBIR
+        END-PERFORM.
+        ADD 1 TO HOJA.
+        PERFORM ESCRIBIR-ENCABEZADO.
+
+       FIN.
+           CLOSE EMPRESAS.
+           CLOSE ACT-TIMES.
+           CLOSE LISTADO-ESTAD.
+
+       END PROGRAM TP.

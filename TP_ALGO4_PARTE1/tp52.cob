@@ -251,7 +251,7 @@
 
        PROCEDURE DIVISION.
        COMIENZO.
-            DISPLAY 'Hola mundo'.
+      *      DISPLAY 'Hola mundo'.
             PERFORM INICIO.
             PERFORM LEER-NOV-TIMES1.
             PERFORM LEER-NOV-TIMES2.
@@ -395,7 +395,13 @@
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        PROCESAR-CONSULTOR.
+        DISPLAY 'CONSULTOR-ANTERIOR ' CONSULTOR-ANTERIOR.
+        DISPLAY 'CONS-NUMERO ' CONS-NUMERO.
         IF CONSULTOR-ANTERIOR NOT EQUAL CONS-NUMERO THEN
+           DISPLAY 'ENTRO................'
+           DISPLAY 'TAB-CAT-SRT(INDICE) ' TAB-CAT-SRT(INDICE)
+           DISPLAY 'CONS-SRT ' CONS-SRT
+
            SEARCH TAB-CATEGORIAS
            AT END DISPLAY 'CATEGORIA NO ENCONTRADA'
            WHEN TAB-CAT-SRT(INDICE) EQUAL CONS-SRT
@@ -461,6 +467,10 @@
         MOVE NOV-TIMES1-ANIO TO DATOS-CONS-ANIO.
         MOVE NOV-TIMES1-HORAS TO DATOS-CONS-HORAS.
         SET EMP-INDICE TO 1.
+
+      *  DISPLAY "EMPRESA: "NOV-TIMES1-EMPRESA.
+      *  DISPLAY "TAB-EMPRESA: "TAB-EMP-EMPRESA(EMP-INDICE).
+
         SEARCH TAB-EMPRESAS
            AT END DISPLAY 'EMPRESA NO ENCONTRADA'
            WHEN TAB-EMP-EMPRESA(EMP-INDICE) EQUAL NOV-TIMES1-EMPRESA

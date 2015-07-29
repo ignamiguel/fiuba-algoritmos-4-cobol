@@ -2,42 +2,42 @@
  29/07/2015                                         HOJA 001
 
  CONSULTOR: 1         NOMBRE: Aldo Gutierres
-                      CATEGORIA: ADKHSKJAHSDKKJA
-                      TARIFA:   500.99
+                      CATEGORIA: Categoria 1
+                      TARIFA: 10050.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    2.10     1052.07
+02/01/2015     004     PLUSPETROL                     2.10    21105.00
+TOTALES POR FECHA:                                    2.10    21105.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    4.30     2154.25
+03/01/2015     004     PLUSPETROL                     2.30    23115.00
+03/01/2015     004     PLUSPETROL                     2.00    20100.00
+TOTALES POR FECHA:                                    4.30    43215.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    1.60      801.58
+04/01/2015     003     VISA                            .30     3015.00
+04/01/2015     001     TENARIS                        1.30    13065.00
+TOTALES POR FECHA:                                    1.60    16080.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    4.50     2254.45
+05/01/2015     001     TENARIS                        3.30    33165.00
+05/01/2015     002     ARCOR                          1.20    12060.00
+TOTALES POR FECHA:                                    4.50    45225.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    1.00      500.99
-TOTALES POR CONSULTOR:                               13.50     6763.36
-
-
-
-
-
-
-
-
+06/01/2015     003     VISA                           1.00    10050.00
+TOTALES POR FECHA:                                    1.00    10050.00
+TOTALES POR CONSULTOR:                               13.50   135675.00
 
 
 
@@ -63,36 +63,36 @@ TOTALES POR CONSULTOR:                               13.50     6763.36
  29/07/2015                                         HOJA 002
 
  CONSULTOR: 2         NOMBRE: Miguel Richio
-                      CATEGORIA: SBA,NASBD.JASD
-                      TARIFA:   750.80
+                      CATEGORIA: Categoria 2
+                      TARIFA:   500.99
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    2.10     1576.68
+02/01/2015     004     PLUSPETROL                     2.10     1052.07
+TOTALES POR FECHA:                                    2.10     1052.07
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    3.75     2815.50
+03/01/2015     002     ARCOR                          1.00      500.99
+03/01/2015     001     TENARIS                        2.30     1152.27
+03/01/2015     002     ARCOR                           .45      225.44
+TOTALES POR FECHA:                                    3.75     1878.71
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    3.50     2627.80
+04/01/2015     003     VISA                           2.30     1152.27
+04/01/2015     003     VISA                           1.20      601.18
+TOTALES POR FECHA:                                    3.50     1753.46
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    1.42     1066.13
-TOTALES POR CONSULTOR:                               24.27    18221.91
-
-
-
-
-
-
-
+05/01/2015     003     VISA                           1.42      711.40
+TOTALES POR FECHA:                                    1.42      711.40
+TOTALES POR CONSULTOR:                               24.27    12159.02
 
 
 
@@ -124,48 +124,48 @@ TOTALES POR CONSULTOR:                               24.27    18221.91
  29/07/2015                                         HOJA 003
 
  CONSULTOR: 3         NOMBRE: Juan Gutierres
-                      CATEGORIA: ADKHSKJAHSDKKJA
-                      TARIFA:   500.99
+                      CATEGORIA: Categoria 1
+                      TARIFA: 10050.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                     .50      250.49
+02/01/2015     002     ARCOR                           .50     5025.00
+TOTALES POR FECHA:                                     .50     5025.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    1.25      626.23
+03/01/2015     001     TENARIS                        1.25    12562.50
+TOTALES POR FECHA:                                    1.25    12562.50
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    3.82     1913.78
+04/01/2015     001     TENARIS                         .45     4522.50
+04/01/2015     004     PLUSPETROL                     2.00    20100.00
+04/01/2015     001     TENARIS                        1.37    13768.50
+TOTALES POR FECHA:                                    3.82    38391.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    2.05     1027.02
+05/01/2015     001     TENARIS                         .55     5527.50
+05/01/2015     002     ARCOR                          1.50    15075.00
+TOTALES POR FECHA:                                    2.05    20602.50
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    3.00     1502.97
+04/01/2015     001     TENARIS                        3.00    30150.00
+TOTALES POR FECHA:                                    3.00    30150.00
 
 ----------------------------------------------------------------------
  FECHA      EMPRESA      RAZON SOCIAL                HORAS    IMPORTE
 ----------------------------------------------------------------------
-TOTALES POR FECHA:                                    2.40     1202.37
-TOTALES POR CONSULTOR:                               37.29    18681.91
-
-
-
-
-
-
-
-
-
+06/01/2015     004     PLUSPETROL                     2.40    24120.00
+TOTALES POR FECHA:                                    2.40    24120.00
+TOTALES POR CONSULTOR:                               37.29   374764.50
 
 
 
@@ -184,4 +184,4 @@ TOTALES POR CONSULTOR:                               37.29    18681.91
 ----------------------------------------------------------------------
  29/07/2015                                         HOJA 004
 
-TOTAL GENERAL:                                                43667.18
+TOTAL GENERAL:                                               522598.52
