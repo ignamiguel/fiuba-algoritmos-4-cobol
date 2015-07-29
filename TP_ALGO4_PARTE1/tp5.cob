@@ -1,6 +1,6 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. TP.
-     
+
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
@@ -35,7 +35,7 @@
        01 LINEA-LISTADO PIC X(70).
 
        FD NOV-TIMES1     LABEL RECORD IS STANDARD
-                        VALUE OF FILE-ID IS "NOVUNO.DAT".
+                        VALUE OF FILE-ID IS "NOV1.DAT".
        01 REG-NOV-TIMES1.
             03 NOV-TIMES1-NUMERO    PIC X(5).
             03 NOV-TIMES1-FECHA.
@@ -45,7 +45,7 @@
             03 NOV-TIMES1-EMPRESA    PIC 9(3).
             03 NOV-TIMES1-TAREA        PIC X(4).
             03 NOV-TIMES1-HORAS        PIC 9(2)V99.
-            
+
        FD NOV-TIMES2     LABEL RECORD IS STANDARD
                         VALUE OF FILE-ID IS "NOV2.DAT".
        01 REG-NOV-TIMES2.
@@ -118,7 +118,7 @@
             88 EOF-EMPRESAS VALUE "SI".
        77 EOF-CAT PIC XX VALUE "NO".
             88 EOF-CATEGORIAS VALUE "SI".
-       
+
        01 CLAVE-NOV-TIMES1.
             03 CLAVE-NOV-TIMES1-NUMERO     PIC 9(5).
             03 CLAVE-NOV-TIMES1-FECHA    PIC 9(8).
