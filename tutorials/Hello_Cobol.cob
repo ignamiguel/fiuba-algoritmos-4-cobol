@@ -20,9 +20,9 @@
        01 WS-NAME PIC A(30).
        01 WS-ID PIC 9(5) VALUE 12345.
 
-       01 WS-NUM1 PIC S9(3)V9(2).
-       01 WS-NUM2 PIC PPP999.
-       01 WS-NUM3 PIC S9(3)V9(2) VALUE -123.45.
+       01 S9-3-V9-2 PIC S9(3)V9(2).
+       01 PPP999 PIC PPP999.
+       01 S9-3-V9-2-NEW PIC S9(3)V9(2) VALUE -123.45.
        01 WS-NEW-NAME PIC A(6) VALUE 'ABCDEF'.
        01 WS-NEW-ID PIC X(5) VALUE 'A121$'.
 
@@ -47,11 +47,11 @@
       **
       * The main procedure of the program
       **
-      *      PERFORM BASIC-PROCEDURE.
+            PERFORM BASIC-PROCEDURE.
       *      PERFORM USER-INPUT-PROCEDURE.
       *      PERFORM REPLACING-PROCEDURE.
       *      PERFORM REDEFINES-PROCEDURE.
-            PERFORM IF-EXAMPLE.
+      *      PERFORM IF-EXAMPLE.
 
             STOP RUN.
       ** add other procedures here
@@ -63,9 +63,9 @@
             MOVE 'TutorialsPoint' TO WS-NAME.
             DISPLAY "My name is : "WS-NAME.
             DISPLAY "My ID is : "WS-ID.
-            DISPLAY "WS-NUM1 : "WS-NUM1.
-            DISPLAY "WS-NUM2 : "WS-NUM2.
-            DISPLAY "WS-NUM3 : "WS-NUM3.
+            DISPLAY "S9-3-V9-2 : "S9-3-V9-2.
+            DISPLAY "PPP999 : "PPP999.
+            DISPLAY "S9-3-V9-2-NEW : "S9-3-V9-2-NEW.
             DISPLAY "WS-NEW-NAME : "WS-NEW-NAME.
             DISPLAY "WS-NEW-ID : "WS-NEW-ID.
       *-----------------------------------------------------------*

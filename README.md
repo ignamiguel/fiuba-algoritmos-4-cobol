@@ -9,4 +9,6 @@ More tutorials here:
 
 [COBOL programming - tutorials, lectures, exercises, examples http://www.csis.ul.ie/cobol/](http://www.csis.ul.ie/cobol/) 
 
+[The COBOL-85 Tutorial http://www.salgslisten.dk/e-academy/cobol85tutorial/Chp09.HTM](http://www.salgslisten.dk/e-academy/cobol85tutorial/Chp09.HTM)
+
 
