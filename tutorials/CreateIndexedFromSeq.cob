@@ -15,7 +15,7 @@
                       WITH DUPLICATES
           FILE STATUS IS VideoStatus.
 
-          SELECT SeqVideoFile ASSIGN TO "..\files\INVIDEO.DAT"
+          SELECT SeqVideoFile ASSIGN TO "..\files\IN-VIDEO.DAT"
           ORGANIZATION IS LINE SEQUENTIAL.
 
 
