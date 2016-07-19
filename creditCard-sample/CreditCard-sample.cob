@@ -1,32 +1,45 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID.  ReadingIndexedFile.
-       AUTHOR.  Michael Coughlan.
+       PROGRAM-ID.  CreditCard-Sample.
+      * AUTHOR:  nacho.
       * Sequential reading of an indexed file
 
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-          SELECT VideoFile ASSIGN TO "..\files\VIDEO.DAT"
+          SELECT SaldoFile ASSIGN TO "..\files\SALDOS.DAT"
           ORGANIZATION IS INDEXED
           ACCESS MODE IS DYNAMIC
-          RECORD KEY IS VideoCode
-          ALTERNATE RECORD KEY IS VideoTitle
-               WITH DUPLICATES
-          FILE STATUS IS VideoStatus.
+          RECORD KEY IS SALD-KEY
+          FILE STATUS IS SaldoStatus.
 
-
+          SELECT TarjetasFile ASSIGN TO "..\files\TARJETAS.DAT"
+          ORGANIZATION IS INDEXED
+          ACCESS MODE IS DYNAMIC
+          RECORD KEY IS TJ-KEY
+          FILE STATUS IS TarjetaStatus.
 
        DATA DIVISION.
        FILE SECTION.
-       FD VideoFile.
-        01 VideoRecord.
-          88 EndOfFile VALUE HIGH-VALUE.
-          02 VideoCode               PIC 9(5).
-          02 VideoTitle              PIC X(40).
-          02 SupplierCode            PIC 99.
+
+       FD SaldoFile.
+       01 SaldoRecord.
+         88 EOF-SALDO VALUE HIGH-VALUE.
+         02 SALD-KEY.
+          04 SALD-NRO-TARJ            PIC 9(10).
+          04 SALD-FECHA               PIC X(10).
+         02 SALD-IMPORTE             PIC 9(6)V99.
+
+       FD TarjetasFile.
+       01 TarjetaRecord.
+         88 EOF-TARJETA VALUE HIGH-VALUE.
+         02 TJ-KEY.
+          03 SeqTJ-NRO-TARJ        PIC 9(10).
+         02 SeqTJ-TITULAR           PIC X(30).
+         02 SeqTJ-DOCUMENTO         PIC 9(11).
 
        WORKING-STORAGE SECTION.
-       01   VideoStatus              PIC X(2).
+       01   SaldoStatus               PIC X(2).
+       01   TarjetaStatus               PIC X(2).
 
        01   RequiredSequence         PIC 9.
             88 VideoCodeSequence    VALUE 1.
@@ -39,33 +52,76 @@
 
        PROCEDURE DIVISION.
        Begin.
-          OPEN INPUT VideoFile.
+          PERFORM OPEN-FILES.
 
-          DISPLAY "Enter key : 1=VideoCode, 2=VideoTitle ->"
-             WITH NO ADVANCING.
+      *   DISPLAY "Enter key : 1=VideoCode, 2=VideoTitle ->"
+      *       WITH NO ADVANCING.
 
-          ACCEPT RequiredSequence.
+      *    ACCEPT RequiredSequence.
 
-          IF VideoTitleSequence
-             MOVE SPACES TO VideoTitle
-             START VideoFile KEY IS GREATER THAN VideoTitle
-         INVALID KEY  DISPLAY "VIDEO STATUS :- ", VideoStatus
-             END-START
-          END-IF
+          *> IF VideoTitleSequence
+             *> MOVE SPACES TO VideoTitle
+             *> START SaldoFile KEY IS GREATER THAN VideoTitle
+         *> INVALID KEY  DISPLAY "VIDEO STATUS :- ", VideoStatus
+             *> END-START
+          *> END-IF
 
-          READ VideoFile NEXT RECORD
-             AT END SET EndOfFile TO TRUE
+          PERFORM READ-FIRST.
+          PERFORM PRINT-FILES.
+          PERFORM CLOSE-FILES.
+          STOP RUN.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       OPEN-FILES.
+      *   Start open file.
+          OPEN INPUT SaldoFile.
+          OPEN INPUT TarjetasFile.
+      *   End open file.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       READ-FIRST.
+      * Start read first.
+          READ SaldoFile NEXT RECORD
+             AT END SET EOF-SALDO TO TRUE
           END-READ.
-          PERFORM UNTIL EndOfFile
-             MOVE VideoCode TO PrnVideoCode
-             MOVE VideoTitle TO PrnVideoTitle
-             MOVE SupplierCode TO PrnSupplierCode
-             DISPLAY  PrnVideoRecord
-             READ VideoFile NEXT RECORD
-         AT END SET EndOfFile TO TRUE
+
+          READ TarjetasFile NEXT RECORD
+             AT END SET EOF-TARJETA TO TRUE
+          END-READ.
+      * End read first.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       PRINT-FILES.
+      * Start print files.
+        PERFORM UNTIL EOF-SALDO
+             *> MOVE VideoCode TO PrnVideoCode
+             *> MOVE VideoTitle TO PrnVideoTitle
+             *> MOVE SupplierCode TO PrnSupplierCode
+             *> DISPLAY  PrnVideoRecord
+             DISPLAY  SaldoRecord
+             READ SaldoFile NEXT RECORD
+         AT END SET EOF-SALDO TO TRUE
              END-READ
           END-PERFORM.
 
-          CLOSE VideoFile.
-          STOP RUN.
-       END PROGRAM ReadingIndexedFile.
+          PERFORM UNTIL EOF-TARJETA
+             *> MOVE VideoCode TO PrnVideoCode
+             *> MOVE VideoTitle TO PrnVideoTitle
+             *> MOVE SupplierCode TO PrnSupplierCode
+             *> DISPLAY  PrnVideoRecord
+             DISPLAY  TarjetaRecord
+             READ TarjetasFile NEXT RECORD
+         AT END SET EOF-TARJETA TO TRUE
+             END-READ
+          END-PERFORM.
+      * End print files.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       CLOSE-FILES.
+      * Start close files.
+        CLOSE SaldoFile.
+        CLOSE TarjetasFile.
+      * End close files.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       END PROGRAM CreditCard-Sample.
