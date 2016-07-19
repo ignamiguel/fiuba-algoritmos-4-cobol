@@ -1,7 +1,7 @@
 
        IDENTIFICATION DIVISION.
        PROGRAM-ID. CreateIndexedFromSeq.
-      * AUTHOR.  Michael Coughlan.
+      * AUTHOR.  nacho.
       * Creates an indexed file  from a sequential file.
 
        ENVIRONMENT DIVISION.
@@ -13,7 +13,7 @@
           RECORD KEY IS SALD-KEY
           FILE STATUS IS SaldoStatus.
 
-          SELECT SeqSaldoFile ASSIGN TO "..\files\INPUT-SALDOS-2.dat"
+          SELECT SeqSaldoFile ASSIGN TO "..\files\INPUT-SALDOS.dat"
           ORGANIZATION IS LINE SEQUENTIAL.
 
 
