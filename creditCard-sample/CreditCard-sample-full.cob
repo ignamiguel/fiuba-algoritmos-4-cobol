@@ -151,7 +151,7 @@
        Process_All_Files.
 
          PERFORM UNTIL EOF-CUPON-1 AND EOF-CUPON-2 AND EOF-CUPON-3
-             PERFORM Set_lovest_CC_Key
+             PERFORM Set_lowest_CC_Key
 
              DISPLAY "Processing CC -> " WS-CC-Key
              PERFORM Process-CreditCard
@@ -160,7 +160,7 @@
 
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
-       Set_lovest_CC_Key.
+       Set_lowest_CC_Key.
         INITIALIZE WS-CC-Key.
         MOVE C1-NRO-TARJ TO WS-CC-Key.
         *> A=1 B=2 C=3
