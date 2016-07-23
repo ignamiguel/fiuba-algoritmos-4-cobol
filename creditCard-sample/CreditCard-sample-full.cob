@@ -36,8 +36,12 @@
        01 CuponRecord.
          88 EOF-CUPON-1 VALUE HIGH-VALUE.
         03 C1-NRO-TARJ            PIC 9(10).
-        03 C1-NRO-CUPON            PIC 9(5).
-        03 C1-FECHA-COMPRA            PIC X(10).
+        03 C1-NRO-CUPON           PIC 9(5).
+        03 C1-FECHA-COMPRA.
+          06 C1-FILLER            PIC X(2).
+          06 C1-DAY               PIC X(2).
+          06 C1-MONTH             PIC X(2).
+          06 C1-YEAR              PIC X(4).
         03 C1-IMPORTE            PIC 9(6)V99.
 
        FD SaldoFile.
@@ -63,6 +67,9 @@
        01   WS-CreditCardValid       PIC X(1).
           88 CC-VALID VALUE HIGH-VALUE.
           88 CC-INVALID VALUE LOW-VALUE.
+       01   WS-Saldo-amount          PIC 9(10)V99.
+       01   WS-total-amount          PIC 9(10)V99.
+       01   WS-cupon-counter         PIC 9(2).
 
        01 WS-C1.
         03 WS-nro-tarjeta            PIC 9(10).
@@ -103,61 +110,81 @@
       *-----------------------------------------------------------*
        Process_All_Files.
          PERFORM UNTIL EOF-CUPON-1
-
-             DISPLAY "Processing credit card num -> " C1-NRO-TARJ
+             DISPLAY "Processing CC -> " C1-NRO-TARJ
              PERFORM Process-CreditCard
 
           END-PERFORM.
 
-        *> PERFORM UNTIL EOF-SALDO
-             *> *> MOVE VideoCode TO PrnVideoCode
-             *> *> MOVE VideoTitle TO PrnVideoTitle
-             *> *> MOVE SupplierCode TO PrnSupplierCode
-             *> *> DISPLAY  PrnVideoRecord
-             *> DISPLAY  SaldoRecord
-             *> READ SaldoFile NEXT RECORD
-         *> AT END SET EOF-SALDO TO TRUE
-             *> END-READ
-          *> END-PERFORM.
-          *> DISPLAY "".
-          *> DISPLAY "Tarjetas:".
-          *> PERFORM UNTIL EOF-TARJETA
-             *> *> MOVE VideoCode TO PrnVideoCode
-             *> *> MOVE VideoTitle TO PrnVideoTitle
-             *> *> MOVE SupplierCode TO PrnSupplierCode
-             *> *> DISPLAY  PrnVideoRecord
-             *> DISPLAY  TarjetaRecord
-             *> READ TarjetasFile NEXT RECORD
-         *> AT END SET EOF-TARJETA TO TRUE
-             *> END-READ
-          *> END-PERFORM.
-      * End process files.
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Process-CreditCard.
-         *> Backup value into another variable so content
-         *> can be updated when reading next record.
-          MOVE C1-NRO-TARJ TO WS-nro-tarjeta.
+          PERFORM Check_CreditCard.
 
-          PERFORM UNTIL C1-NRO-TARJ <> WS-nro-tarjeta
-
-             PERFORM Check_CreditCard
-
-             IF CC-VALID
-                DISPLAY "CC VALID"
+          IF CC-VALID
+                DISPLAY "VALID CC"
                 PERFORM Print_CreditCard_Details
                 PERFORM Print_Saldo
-             ELSE
-                DISPLAY "INVALID CC move to next cc"
-             END-IF
+                PERFORM Process_All_Cupons_For_CC
+                PERFORM Print_Amounts
+          ELSE
+                *>DISPLAY "INVALID CC move to next record"
+                PERFORM Move_to_Next_CC
+          END-IF.
 
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       Print_Amounts.
+           DISPLAY "------------------------------------".
+           DISPLAY "Total de la tarjeta: " WS-total-amount.
+           COMPUTE WS-Saldo-amount = FUNCTION NUMVAL(WS-Saldo-amount)
+           END-COMPUTE
+           COMPUTE WS-total-amount = WS-total-amount + WS-Saldo-amount.
+           DISPLAY "Saldo final: " WS-total-amount.
+           DISPLAY "------------------------------------".
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       Process_All_Cupons_For_CC.
+         DISPLAY "------------------------------------".
+         DISPLAY "Cupones".
+         MOVE 1 TO WS-cupon-counter.
+         MOVE 0 TO WS-total-amount.
+
+         *> Backup value into another variable so content
+         *> can be updated when reading next record.
+         MOVE C1-NRO-TARJ TO WS-nro-tarjeta.
+
+         PERFORM UNTIL C1-NRO-TARJ <> WS-nro-tarjeta
+            PERFORM Print_Cupon_Details
+
+            MOVE C1-IMPORTE TO WS-C1-IMPORTE
+            COMPUTE WS-C1-IMPORTE = FUNCTION NUMVAL(WS-C1-IMPORTE)
+            END-COMPUTE
+            COMPUTE WS-total-amount = (WS-total-amount + WS-C1-IMPORTE)
+
+            READ Cupon1_file NEXT RECORD
+             AT END SET EOF-CUPON-1 TO TRUE
+            END-READ
+
+            ADD 1 TO WS-cupon-counter
+
+         END-PERFORM.
+         DISPLAY "------------------------------------".
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       Print_Cupon_Details.
+         DISPLAY "[" WS-cupon-counter "]".
+         DISPLAY "   Nro Cupon: " C1-NRO-CUPON.
+         DISPLAY "   Fecha compra: " C1-DAY "/" C1-MONTH "/"C1-YEAR.
+         DISPLAY "   Importe: " C1-IMPORTE.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       Move_to_Next_CC.
+        MOVE C1-NRO-TARJ TO WS-nro-tarjeta.
+        PERFORM UNTIL C1-NRO-TARJ <> WS-nro-tarjeta
              READ Cupon1_file NEXT RECORD
               AT END SET EOF-CUPON-1 TO TRUE
              END-READ
-
-         END-PERFORM.
-
-         DISPLAY "END OF CARD -> " C1-NRO-TARJ.
+        END-PERFORM.
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Check_CreditCard.
@@ -165,8 +192,8 @@
         MOVE C1-NRO-TARJ TO TJ-NRO-TARJ.
 
         START TarjetasFile KEY IS EQUAL TO TJ-KEY
-         INVALID KEY DISPLAY "Invalid CC Key :- ", TarjetaStatus
-         NOT INVALID KEY DISPLAY "Tarjeta Pointer Updated "TarjetaStatus
+         *>INVALID KEY DISPLAY "Invalid CC Key :- ", TarjetaStatus
+         *>NOT INVALID KEY DISPLAY "Tarjeta Pointer Updated "TarjetaStatus
         END-START.
 
         IF TarjetaStatus = "00"
@@ -182,30 +209,35 @@
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Print_CreditCard_Details.
-
+        DISPLAY "------------------------------------".
+        DISPLAY "CC Details".
         DISPLAY "Titular: " TJ-TITULAR.
         DISPLAY "Documento: " TJ-DOCUMENTO.
         DISPLAY "Nro Tarjeta: " TJ-NRO-TARJ.
-
+        DISPLAY "------------------------------------".
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Print_Saldo.
+         DISPLAY "------------------------------------".
          MOVE C1-NRO-TARJ TO SALD-NRO-TARJ.
          MOVE "  10062016" TO SALD-FECHA.
 
          START SaldoFile KEY IS EQUAL TO SALD-KEY
-          INVALID KEY DISPLAY "Invalid Saldo Key :- ", SaldoStatus
-          NOT INVALID KEY DISPLAY "Saldo Pointer Updated :- "SaldoStatus
+          *>INVALID KEY DISPLAY "Invalid Saldo Key :- ", SaldoStatus
+          *>NOT INVALID KEY DISPLAY "Saldo Pointer Updated :- "SaldoStatus
          END-START.
 
         IF SaldoStatus = "00"
            READ SaldoFile NEXT RECORD
               AT END SET EOF-SALDO TO TRUE
            END-READ
-           DISPLAY "Saldo anterior: " SALD-IMPORTE
+           MOVE SALD-IMPORTE TO WS-Saldo-amount
+           DISPLAY "Saldo anterior: " WS-Saldo-amount
         ELSE
+           MOVE 0 TO WS-Saldo-amount
            DISPLAY "Saldo anterior: 0,00"
-        END-If.
+        END-IF.
+        DISPLAY "------------------------------------".
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Close_All_Files.
