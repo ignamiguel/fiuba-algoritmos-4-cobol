@@ -214,10 +214,6 @@
          PERFORM Process_CuponFile_2.
          PERFORM Process_CuponFile_3.
 
-         *> Backup value into another variable so content
-         *> can be updated when reading next record.
-         MOVE C1-NRO-TARJ TO WS-nro-tarjeta.
-
          DISPLAY "------------------------------------".
 
       *-----------------------------------------------------------*
@@ -232,6 +228,7 @@
             MOVE C1-IMPORTE TO WS-C1-IMPORTE
             COMPUTE WS-C1-IMPORTE = FUNCTION NUMVAL(WS-C1-IMPORTE)
             END-COMPUTE
+
             COMPUTE WS-total-amount = (WS-total-amount + WS-C1-IMPORTE)
 
             READ Cupon1_file NEXT RECORD
@@ -247,6 +244,7 @@
          DISPLAY "Processing file 2".
          PERFORM UNTIL C2-NRO-TARJ <> WS-CC-Key
 
+            MOVE Cupon2_Record TO Cupon_Record
             PERFORM Print_Cupon_Details
 
             MOVE C2-IMPORTE TO WS-C1-IMPORTE
@@ -267,6 +265,7 @@
          DISPLAY "Processing file 3".
          PERFORM UNTIL C3-NRO-TARJ <> WS-CC-Key
 
+            MOVE Cupon3_Record TO Cupon_Record
             PERFORM Print_Cupon_Details
 
             MOVE C3-IMPORTE TO WS-C1-IMPORTE
@@ -360,7 +359,7 @@
            DISPLAY "Saldo anterior: " WS-Saldo-amount
         ELSE
            MOVE 0 TO WS-Saldo-amount
-           DISPLAY "Saldo anterior: 0,00"
+           DISPLAY "Saldo anterior: 0.00"
         END-IF.
         DISPLAY "------------------------------------".
       *-----------------------------------------------------------*
