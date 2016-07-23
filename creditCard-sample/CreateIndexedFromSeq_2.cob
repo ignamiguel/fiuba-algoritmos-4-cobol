@@ -37,21 +37,23 @@
        FD SeqSaldoFile.
        01 SeqSaldoRecord.
           88   EOF-SALDO VALUE HIGH-VALUES.
-          02 SeqSALD-NRO-TARJ        PIC 9(10).
-          02 SeqSALD-FECHA           PIC X(10).
+          02 SeqSALD-KEY.
+            04 SeqSALD-NRO-TARJ        PIC 9(10).
+            04 SeqSALD-FECHA           PIC X(10).
           02 SeqSALD-IMPORTE         PIC 9(6)V99.
 
        FD TarjetasFile.
        01 TarjetaRecord.
          02 TJ-KEY.
-          03 SeqTJ-NRO-TARJ        PIC 9(10).
+           03 SeqTJ-NRO-TARJ        PIC 9(10).
          02 SeqTJ-TITULAR           PIC X(30).
          02 SeqTJ-DOCUMENTO         PIC 9(11).
 
        FD SeqTarjetasFile.
        01 SeqTarjetaRecord.
           88   EOF-TARJETA VALUE HIGH-VALUES.
-          02 SeqTJ-NRO-TARJ        PIC 9(10).
+          02 SeqTJ-KEY.
+            03 SeqTJ-NRO-TARJ        PIC 9(10).
           02 SeqTJ-TITULAR           PIC X(30).
           02 SeqTJ-DOCUMENTO         PIC 9(11).
 
@@ -94,7 +96,7 @@
        CREATE-INDEXED-FILES.
       *   Start create indexed files.
           PERFORM UNTIL EOF-SALDO
-      *    DISPLAY SeqSaldoRecord
+          DISPLAY SeqSaldoRecord
              WRITE SaldoRecord FROM SeqSaldoRecord
              INVALID KEY DISPLAY "SALDO STATUS :- ", SaldoStatus
              END-WRITE
@@ -104,7 +106,7 @@
           END-PERFORM.
 
           PERFORM UNTIL EOF-TARJETA
-      *    DISPLAY SeqTarjetaRecord
+          DISPLAY SeqTarjetaRecord
              WRITE TarjetaRecord FROM SeqTarjetaRecord
              INVALID KEY DISPLAY "TARJETA STATUS :- ", TarjetaStatus
              END-WRITE

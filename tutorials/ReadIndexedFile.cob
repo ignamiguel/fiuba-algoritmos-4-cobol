@@ -47,9 +47,12 @@
           ACCEPT RequiredSequence.
 
           IF VideoTitleSequence
-             MOVE SPACES TO VideoTitle
-             START VideoFile KEY IS GREATER THAN VideoTitle
+             *>MOVE SPACES TO VideoTitle
+             MOVE "YACHT MASTER" TO VideoTitle
+             *>START VideoFile KEY IS GREATER THAN VideoTitle
+             START VideoFile KEY IS EQUAL TO VideoTitle
          INVALID KEY  DISPLAY "VIDEO STATUS :- ", VideoStatus
+         NOT INVALID KEY  DISPLAY "OK VIDEO STATUS :- ", VideoStatus
              END-START
           END-IF
 
