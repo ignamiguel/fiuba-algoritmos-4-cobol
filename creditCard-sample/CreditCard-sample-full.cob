@@ -22,13 +22,6 @@
           RECORD KEY IS SALD-KEY
           FILE STATUS IS SaldoStatus.
 
-          SELECT TarjetasFile ASSIGN TO "..\files\TARJETAS.DAT"
-          ORGANIZATION IS INDEXED
-          ACCESS MODE IS DYNAMIC
-          RECORD KEY IS TJ-KEY
-          FILE STATUS IS TarjetaStatus.
-
-
        DATA DIVISION.
        FILE SECTION.
 
@@ -76,16 +69,9 @@
            04 SALD-FECHA               PIC X(10).
          02 SALD-IMPORTE             PIC 9(6)V99.
 
-       FD TarjetasFile.
-       01 TarjetaRecord.
-         88 EOF-TARJETA VALUE HIGH-VALUE.
-         02 TJ-KEY.
-           03 TJ-NRO-TARJ        PIC 9(10).
-         02 TJ-TITULAR           PIC X(30).
-         02 TJ-DOCUMENTO         PIC 9(11).
 
        WORKING-STORAGE SECTION.
-       01   VideoStatus              PIC X(2).
+       *> WS prefix stands for "working storage"
        01   SaldoStatus              PIC X(2).
        01   TarjetaStatus            PIC X(2).
        01   WS-CreditCardValid       PIC X(1).
@@ -115,6 +101,13 @@
           02 WS-SALD-NRO-TARJ            PIC 9(10).
           02 WS-SALD-FECHA               PIC X(10).
 
+       01 TarjetaRecord.
+         88 EOF-TARJETA VALUE HIGH-VALUE.
+         02 TJ-KEY.
+           03 TJ-NRO-TARJ        PIC 9(10).
+         02 TJ-TITULAR           PIC X(30).
+         02 TJ-DOCUMENTO         PIC 9(11).
+
        PROCEDURE DIVISION.
        Begin.
           PERFORM Open_All_Files.
@@ -126,7 +119,6 @@
       *-----------------------------------------------------------*
        Open_All_Files.
           OPEN INPUT SaldoFile.
-          OPEN INPUT TarjetasFile.
           OPEN INPUT Cupon1_file.
           OPEN INPUT Cupon2_file.
           OPEN INPUT Cupon3_file.
@@ -151,16 +143,15 @@
        Process_All_Files.
 
          PERFORM UNTIL EOF-CUPON-1 AND EOF-CUPON-2 AND EOF-CUPON-3
-             PERFORM Set_lowest_CC_Key
+             PERFORM Find_lowest_CC_Key
 
              DISPLAY "Processing CC -> " WS-CC-Key
              PERFORM Process-CreditCard
 
           END-PERFORM.
-
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
-       Set_lowest_CC_Key.
+       Find_lowest_CC_Key.
         INITIALIZE WS-CC-Key.
         MOVE C1-NRO-TARJ TO WS-CC-Key.
         *> A=1 B=2 C=3
@@ -312,32 +303,20 @@
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Check_CreditCard.
+        *> Call subroutine "checkcc"
+        *> defined in checkcc.cob file
+        CALL 'checkcc' USING BY CONTENT WS-CC-Key,
+        BY REFERENCE WS-CreditCardValid,
+        BY REFERENCE TarjetaRecord.
 
-        MOVE WS-CC-Key TO TJ-NRO-TARJ.
-
-        START TarjetasFile KEY IS EQUAL TO TJ-KEY
-         *>INVALID KEY DISPLAY "Invalid CC Key :- ", TarjetaStatus
-         *>NOT INVALID KEY DISPLAY "Tarjeta Pointer Updated "TarjetaStatus
-        END-START.
-
-        IF TarjetaStatus = "00"
-           *>DISPLAY "HIGH-VALUE TO WS-CreditCardValid"
-           MOVE HIGH-VALUE TO WS-CreditCardValid
-           READ TarjetasFile NEXT RECORD
-              AT END SET EOF-TARJETA TO TRUE
-           END-READ
-        ELSE
-           *>DISPLAY "LOW-VALUE TO WS-CreditCardValid"
-           MOVE LOW-VALUE TO WS-CreditCardValid
-        END-If.
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Print_CreditCard_Details.
         DISPLAY "------------------------------------".
-        DISPLAY "CC Details".
-        DISPLAY "Titular: " TJ-TITULAR.
-        DISPLAY "Documento: " TJ-DOCUMENTO.
-        DISPLAY "Nro Tarjeta: " TJ-NRO-TARJ.
+        DISPLAY "CC Details ->".
+        DISPLAY "             Titular: " TJ-TITULAR.
+        DISPLAY "             Documento: " TJ-DOCUMENTO.
+        DISPLAY "             Nro Tarjeta: " TJ-NRO-TARJ.
         DISPLAY "------------------------------------".
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
@@ -366,7 +345,6 @@
       *-----------------------------------------------------------*
        Close_All_Files.
          CLOSE SaldoFile.
-         CLOSE TarjetasFile.
          CLOSE Cupon1_file.
          CLOSE Cupon2_file.
          CLOSE Cupon3_file.
