@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. CALLED.
+       PROGRAM-ID. called_module.
 
        DATA DIVISION.
        LINKAGE SECTION.

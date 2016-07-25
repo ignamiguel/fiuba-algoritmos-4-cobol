@@ -1,5 +1,5 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. MAIN.
+       PROGRAM-ID. caller_program.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -7,7 +7,7 @@
        01 WS-STUDENT-NAME PIC A(15) VALUE 'Tim'.
 
        PROCEDURE DIVISION.
-        CALL 'CALLED' USING WS-STUDENT-ID, WS-STUDENT-NAME.
+        CALL 'called_module' USING WS-STUDENT-ID, WS-STUDENT-NAME.
         DISPLAY 'Student Id : ' WS-STUDENT-ID.
         DISPLAY 'Student Name : ' WS-STUDENT-NAME.
        STOP RUN.
