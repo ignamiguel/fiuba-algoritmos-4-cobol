@@ -9,13 +9,20 @@
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT StudentFile ASSIGN TO "../files/STUDENTS.DAT"
-       ORGANIZATION IS LINE SEQUENTIAL.
+           SELECT StudentFile ASSIGN TO
+           "../files/students_duplicates.dat"
+           ORGANIZATION IS LINE SEQUENTIAL.
 
-           SELECT MaleStudentFile ASSIGN TO "../files/MALESTUDS.DAT"
-       ORGANIZATION IS LINE SEQUENTIAL.
+           SELECT MaleStudentFile ASSIGN TO
+           "../files/_male_students.dat"
+           ORGANIZATION IS LINE SEQUENTIAL.
 
-           SELECT WorkFile ASSIGN TO "../files/WORK.TMP".
+           SELECT FemaleStudentFile ASSIGN TO
+           "../files/_female_students.dat"
+           ORGANIZATION IS LINE SEQUENTIAL.
+
+           SELECT WorkFile ASSIGN TO "../files/WORK.TMP"
+           ORGANIZATION IS LINE SEQUENTIAL.
 
 
        DATA DIVISION.
@@ -27,35 +34,86 @@
        FD MaleStudentFile.
        01 MaleStudentRec  PIC X(30).
 
+       FD FemaleStudentFile.
+       01 FemaleStudentRecord   PIC X(30).
+
        SD WorkFile.
        01 WorkRec.
-          02 FILLER             PIC 9(7).
+          *>02 FILLER             PIC 9(7).
+          02 WStudentId         PIC 9(7).
           02 WStudentName       PIC X(10).
           02 FILLER             PIC X(12).
           02 WGender            PIC X.
-             88 MaleStudent     VALUE "M".
-             88 FamaleStudent   VALUE "F".
+             88 Is_Male_Student     VALUE "M".
+             88 Is_Female_Student   VALUE "F".
 
        PROCEDURE DIVISION.
        Begin.
-          SORT WorkFile ON ASCENDING KEY WStudentName
-               INPUT PROCEDURE IS GetMaleStudents
-               GIVING MaleStudentFile.
+          *> Get only male students
+          PERFORM Process_Male.
+
+          *> Get only female students
+          PERFORM Process_Female.
+
           STOP RUN.
 
+       Process_Male.
+          SORT WorkFile ON ASCENDING KEY WStudentName
+                           ASCENDING KEY WStudentId
+               INPUT PROCEDURE IS Get_Male_Students
+               GIVING MaleStudentFile.
 
-       GetMaleStudents.
+       Process_Female.
+           SORT WorkFile ON ASCENDING KEY WStudentName
+                            DESCENDING KEY WStudentId
+               INPUT PROCEDURE IS Get_Female_Students
+               GIVING FemaleStudentFile.
+
+       Get_Male_Students.
           OPEN INPUT StudentFile
+
           READ StudentFile
              AT END SET EndOfFile TO TRUE
           END-READ
+
           PERFORM UNTIL EndOfFile
              MOVE StudentRec TO WorkRec
-             IF MaleStudent
+
+             IF Is_Male_Student
                 RELEASE WorkRec
              END-IF
+
              READ StudentFile
                AT END SET EndOfFile TO TRUE
              END-READ
+
           END-PERFORM.
+
+          DISPLAY "Done male!".
+
           CLOSE StudentFile.
+
+       Get_Female_Students.
+          OPEN INPUT StudentFile
+
+          READ StudentFile
+             AT END SET EndOfFile TO TRUE
+          END-READ
+
+          PERFORM UNTIL EndOfFile
+             MOVE StudentRec TO WorkRec
+
+             IF Is_Female_Student
+                RELEASE WorkRec
+             END-IF
+
+             READ StudentFile
+               AT END SET EndOfFile TO TRUE
+             END-READ
+
+          END-PERFORM.
+
+          DISPLAY "Done female!".
+
+          CLOSE StudentFile.
+       END PROGRAM MaleSort.
