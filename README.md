@@ -16,4 +16,5 @@ In order to run it, it is necessary to install Open Cobol https://github.com/Ope
 
 ### Sorting files
 1. [Sorting and Merging files http://www.csis.ul.ie/cobol/course/SortMerge.htm](http://www.csis.ul.ie/cobol/course/SortMerge.htm)
+2. [Sorting and Merging http://www.csis.ul.ie/cobol/examples/#Sort](http://www.csis.ul.ie/cobol/examples/#Sort)
 
