@@ -24,6 +24,9 @@
 
        WORKING-STORAGE SECTION.
        01   TarjetaStatus            PIC X(2).
+          88 Success             VALUE "00".
+          88 NotFound            VALUE "23".
+
 
        LINKAGE SECTION.
        01 LS-STUDENT-ID PIC 9(4).
@@ -55,15 +58,17 @@
           *>NOT INVALID KEY DISPLAY "CC Pointer Updated "TarjetaStatus
          END-START.
 
-          IF TarjetaStatus = "00"
-            *>DISPLAY "HIGH-VALUE TO WS-CreditCardValid"
+          *> Status=00 Success
+          *> Status=23 Not found
+
+          *>IF TarjetaStatus = "00"
+          IF Success
             MOVE HIGH-VALUE TO LS-CreditCardValid
             READ TarjetasFile NEXT RECORD
               AT END SET EOF-TARJETA TO TRUE
             END-READ
             MOVE TarjetaRecord TO LS-TarjetaRecord
           ELSE
-            *>DISPLAY "LOW-VALUE TO WS-CreditCardValid"
             MOVE LOW-VALUE TO LS-CreditCardValid
           END-IF.
           CLOSE TarjetasFile.

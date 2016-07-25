@@ -40,6 +40,19 @@
        01 WS-OLD-X PIC X(10) VALUE 'PEPE 1234'.
        01 WS-NEW-9 REDEFINES WS-OLD-X PIC 9(8).
        01 WS-NEW-A REDEFINES WS-OLD-X PIC A(10).
+
+       01  WS-CURRENT-DATE-FIELDS.
+           05  WS-CURRENT-DATE.
+               10 WS-CURRENT-YEAR     PIC X(04).
+               10 WS-CURRENT-MONTH    PIC X(02).
+               10 WS-CURRENT-DAY     PIC X(02).
+           05  WS-CURRENT-TIME.
+               10 WS-CURRENT-HOUR     PIC  9(2).
+               10  WS-CURRENT-MINUTE  PIC  9(2).
+               10  WS-CURRENT-SECOND  PIC  9(2).
+               10  WS-CURRENT-MS      PIC  9(2).
+               10  WS-GMT-SIGN        PIC X(01).
+               10  WS-GMT-TIME        PIC X(04).
       *-----------------------
        PROCEDURE DIVISION.
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -47,11 +60,12 @@
       **
       * The main procedure of the program
       **
-            PERFORM BASIC-PROCEDURE.
+            *>PERFORM BASIC-PROCEDURE.
       *      PERFORM USER-INPUT-PROCEDURE.
       *      PERFORM REPLACING-PROCEDURE.
       *      PERFORM REDEFINES-PROCEDURE.
       *      PERFORM IF-EXAMPLE.
+             PERFORM Print_Date.
 
             STOP RUN.
       ** add other procedures here
@@ -114,4 +128,19 @@
             ELSE
                DISPLAY "1 NOT = 1"
             END-IF.
+       Print_Date.
+        DISPLAY FUNCTION CURRENT-DATE.
+
+        PERFORM Print_friendly_date.
+
+       Print_friendly_date.
+          MOVE FUNCTION CURRENT-DATE TO WS-CURRENT-DATE-FIELDS.
+          DISPLAY "Today -> "
+          WS-CURRENT-DAY "/" WS-CURRENT-MONTH "/"
+         WS-CURRENT-YEAR.
+
+         DISPLAY "Now -> " WS-CURRENT-HOUR ":" WS-CURRENT-MINUTE ":"
+         WS-CURRENT-SECOND.
+
+
        END PROGRAM COBOL_TUTORIALS.

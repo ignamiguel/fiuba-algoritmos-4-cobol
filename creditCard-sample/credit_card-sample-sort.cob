@@ -2,7 +2,6 @@
        PROGRAM-ID.  CreditCard-Sample.
       * AUTHOR:  nacho.
 
-
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
@@ -16,11 +15,16 @@
           SELECT Cupon3_file ASSIGN TO '..\files\CUPON3.dat'
           ORGANIZATION IS LINE SEQUENTIAL.
 
+          *> Debts
           SELECT SaldoFile ASSIGN TO "..\files\SALDOS.DAT"
           ORGANIZATION IS INDEXED
           ACCESS MODE IS DYNAMIC
           RECORD KEY IS SALD-KEY
           FILE STATUS IS SaldoStatus.
+
+          *> Sort temp file
+          SELECT WorkFile ASSIGN TO "..\files\workfile.dat"
+          ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
        FILE SECTION.
@@ -69,6 +73,15 @@
            04 SALD-FECHA               PIC X(10).
          02 SALD-IMPORTE             PIC 9(6)V99.
 
+       SD WorfFile.
+       01 WorkRecord.
+          02 sort-titular           PIC X(30).
+          02 sort-documento         PIC 9(11).
+          02 sort-nro-tarjeta       PIC 9(10).
+          02 sort-saldo             PIC Z(3),Z(2)9V99.
+
+
+
 
        WORKING-STORAGE SECTION.
        *> WS prefix stands for "working storage"
@@ -110,6 +123,12 @@
 
        PROCEDURE DIVISION.
        Begin.
+          SORT WorkFile ON ASCENDING KEY ORD-EMP-RAZON
+                                 ASCENDING KEY ORD-TIM-FECHA
+                                 ASCENDING KEY ORD-CONS-NOMBRE
+                              INPUT PROCEDURE IS ENTRADA
+                              OUTPUT PROCEDURE IS SALIDA.
+
           PERFORM Open_All_Files.
           PERFORM Read_Sequential_Files.
           PERFORM Process_All_Files.
