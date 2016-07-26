@@ -159,9 +159,9 @@
        01 ReportSecondLine.
          02 RSL_date_title               PIC X(7) VALUE "Fecha: ".
          02 RSL_date_day                 PIC X(2).
-         02 FILLER                       PIC X(2) VALUE "/".
+         02 FILLER                       PIC X(1) VALUE "/".
          02 RSL_date_month               PIC X(2).
-         02 FILLER                       PIC X(2) VALUE "/".
+         02 FILLER                       PIC X(1) VALUE "/".
          02 RSL_date_year                PIC X(4).
 
        01 Empty_line.
@@ -205,8 +205,8 @@
            03 FILLER                     PIC X(1) VALUE "/".
            03 grid_cupon_date_m          PIC X(2).
            03 FILLER                     PIC X(1) VALUE "/".
-           03 grid_cupon_date_y          PIC X(2).
-         02 FILLER                       PIC X(16).
+           03 grid_cupon_date_y          PIC X(4).
+         02 FILLER                       PIC X(14).
          02 FILLER                       PIC X(1) VALUE "|".
          02 grid_amount                  PIC 9(6)V99.
          02 FILLER                       PIC X(12).
