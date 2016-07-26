@@ -272,24 +272,27 @@
            WRITE ReportRecord FROM Report_holder_details_3
            WRITE ReportRecord FROM Empty_line
 
+          *> Backup debt
+          MOVE sort-saldo TO WS-Saldo-amount
+
            PERFORM Print_grid_headers
 
-           *> Set total amount to zero
+           *> WS-total-amount = 0
            INITIALIZE WS-total-amount
 
-           PERFORM UNTIL ws-titular <> sort-holder
+           PERFORM UNTIL sort-holder <> ws-titular
              PERFORM Print_cupon_detail
 
             COMPUTE sort-importe = FUNCTION NUMVAL(sort-importe)
             END-COMPUTE
 
-
              ADD sort-importe TO WS-total-amount
+
              PERFORM Get_record_from_sort_file
            END-PERFORM
 
            PERFORM Print_grid_footer
-           PERFORM Print_total_amount
+           PERFORM Print_footer
 
            ADD 1 TO Report_page_num
 
@@ -345,13 +348,16 @@
           WRITE ReportRecord FROM Grid_border.
           WRITE ReportRecord FROM Empty_line.
 
-       Print_total_amount.
+       Print_footer.
            ADD WS-total-amount TO aux_subtotal.
            MOVE aux_subtotal TO footer_subtotal.
            WRITE ReportRecord FROM Report_footer_details_1.
 
-           COMPUTE WS-total-amount = FUNCTION NUMVAL(sort-saldo)
+           *> Get debt from backup
+           INITIALIZE WS-total-amount.
+           COMPUTE WS-total-amount = FUNCTION NUMVAL(WS-Saldo-amount)
            END-COMPUTE.
+
            ADD WS-total-amount TO aux_subtotal.
 
            MOVE aux_subtotal TO footer_total.
