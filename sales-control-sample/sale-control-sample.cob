@@ -4,7 +4,7 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
 
-          SELECT VentasFile ASSIGN TO "..\files\ventas-indexed.dat"
+          SELECT VentasFile ASSIGN TO "..\files\ventas_indexed.dat"
           ORGANIZATION IS INDEXED
           ACCESS MODE IS DYNAMIC
           RECORD KEY IS Ventas-key
@@ -14,29 +14,30 @@
           ORGANIZATION IS LINE SEQUENTIAL.
 
           SELECT ComerciosFile ASSIGN TO
-          "..\files\comercios-indexed.dat"
+          "..\files\comercios_indexed.dat"
           ORGANIZATION IS INDEXED
           ACCESS MODE IS DYNAMIC
           RECORD KEY IS Comercio-key
           FILE STATUS IS ComercioFS.
 
           SELECT LimiteVentaFile ASSIGN TO
-          "..\files\limite-venta-indexed.dat"
+          "..\files\limite_venta_indexed.dat"
           ORGANIZATION IS INDEXED
           ACCESS MODE IS DYNAMIC
           RECORD KEY IS LimiteVenta-key
-          FILE STATUS IS LimiteVentasFS.
+          FILE STATUS IS LimiteVentaFS.
 
 
        DATA DIVISION.
        FILE SECTION.
        FD VentasFile.
        01 VentasRecord.
-            88 Ventas-EOF              VALUE HIGH-VALUE.
+           88  Ventas-EOF                VALUE HIGH-VALUE.
          02 Ventas-key.
           04 Ventas-comercio-num         PIC 9(6).
           04 Ventas-moneda               PIC 9(1).
           04 Ventas-fecha                PIC X(8).
+         02 Ventas-nro-card              PIC 9(4).
          02 Ventas-importe               PIC 9(3)V99.
 
        FD ComerciosFile.
@@ -62,16 +63,17 @@
 
        FD LimiteVentaFile.
        01 LimiteVentaRecord.
+            88 LimiteVenta-EOF           VALUE HIGH-VALUES.
          02 LimiteVenta-key.
            03 LimiteVenta-letra          PIC X(1).
            03 LimiteVenta-fecha-desde    PIC 9(8).
-           03 LimtieVenta-fecha-hasta    PIC 9(8).
+           03 LimiteVenta-fecha-hasta    PIC 9(8).
          02 LimiteVenta-valor            PIC 9(6)V99.
 
 
        WORKING-STORAGE SECTION.
        01 VentasFS                       PIC X(2).
-       01 LimiteVentasFS                 PIC X(2).
+       01 LimiteVentaFS                  PIC X(2).
           88 LimiteVenta_success         VALUE "00".
        01 ComercioFS                     PIC X(2).
           88 comercio_success            VALUE "00".
@@ -92,15 +94,17 @@
 
        Open_files.
          OPEN INPUT VentasFile.
+         *> file status = 35
+         *> not found
+         *>DISPLAY VentasFS.
          OPEN INPUT RubrosFile.
          OPEN INPUT ComerciosFile.
+         OPEN INPUT LimiteVentaFile.
 
        Read_files.
           READ VentasFile NEXT RECORD
              AT END SET Ventas-EOF TO TRUE
           END-READ.
-          DISPLAY VentasFS.
-          DISPLAY VentasRecord.
 
           READ RubrosFile NEXT RECORD
              AT END SET Rubros-EOF TO TRUE
@@ -131,13 +135,10 @@
           END-IF.
 
        Validate_commerce.
-       *> Set search filter
+         *> Set search filter
          MOVE Ventas-comercio-num TO Comercio-key.
 
-         DISPLAY Comercio-key.
-         STOP RUN.
-
-       *> Search in commerce master file
+         *> Search in commerce master file
          START ComerciosFile KEY IS EQUAL TO Comercio-key
          END-START.
 
@@ -154,35 +155,49 @@
          END-IF.
 
        Evalute_sale.
-       *> Set parameters
-       *> ...
+          *> Set parameters
+          *> ...
 
-       *> Get limits
-       *> CALL "getlimit" USING BY CONTENT XXX,
+          *> Get limits
+          *> CALL "getlimit" USING BY CONTENT XXX,
                       *> BY REFERNCE
                        *> BY REFERENCE XXX.
            PERFORM Get_limits.
 
-       *> Decide if it must be stored
+          *> Decide if record must be stored
+          IF (Ventas-importe > LimiteVenta-valor) AND
+             Ventas-fecha >= LimiteVenta-fecha-desde AND
+             Ventas-fecha <= LimiteVenta-fecha-hasta THEN
+
+             DISPLAY VentasRecord
+
+          END-IF.
+
+
 
        Get_limits.
-       *> Set search filter
+          *> Set search filter
           MOVE Comercio-limite-venta TO LimiteVenta-letra.
-
+          *> Force since date and upto date parameters
           MOVE "20160701" TO LimiteVenta-fecha-desde.
-          MOVE "20160801" TO LimtieVenta-fecha-hasta.
+          MOVE "20160801" TO LimiteVenta-fecha-hasta.
 
           START LimiteVentaFile KEY IS EQUAL TO LimiteVenta-key
           END-START.
 
           IF LimiteVenta_success
-             DISPLAY "limite found!!!"
+             READ LimiteVentaFile NEXT RECORD
+                AT END SET LimiteVenta-EOF TO TRUE
+             END-READ
           ELSE
+              *> To do error handeling
               DISPLAY "limite venta not found"
           END-IF.
+
        Close_files.
          CLOSE VentasFile.
          CLOSE RubrosFile.
          CLOSE ComerciosFile.
+         CLOSE LimiteVentaFile.
 
        END PROGRAM SaleControl-sample.

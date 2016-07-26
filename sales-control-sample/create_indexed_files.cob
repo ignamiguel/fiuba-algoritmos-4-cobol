@@ -14,7 +14,7 @@
           RECORD KEY IS Ventas-key
           FILE STATUS IS VentasStatus.
 
-          SELECT SeqVentasFile ASSIGN TO "..\files\ventas-input.dat"
+          SELECT SeqVentasFile ASSIGN TO "..\files\ventas_input.dat"
           ORGANIZATION IS LINE SEQUENTIAL.
 
           SELECT ComercioFile ASSIGN TO "..\files\comercios_indexed.dat"
@@ -24,7 +24,7 @@
           FILE STATUS IS ComercioStatus.
 
           SELECT SeqComercioFile ASSIGN TO
-          "..\files\comercios-input.dat"
+          "..\files\comercios_input.dat"
           ORGANIZATION IS LINE SEQUENTIAL.
 
           SELECT LimiteVentaFile ASSIGN TO
@@ -35,7 +35,7 @@
           FILE STATUS IS LimiteVentaStatus.
 
           SELECT SeqLimiteVentaFile ASSIGN TO
-          "..\files\limite-venta-input.dat"
+          "..\files\limite_venta_input.dat"
           ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
@@ -46,12 +46,13 @@
           04 Ventas-comercio-num         PIC 9(6).
           04 Ventas-moneda               PIC 9(1).
           04 Ventas-fecha                PIC X(8).
+         02 Ventas-nro-card              PIC 9(4).
          02 Ventas-importe               PIC 9(3)V99.
 
        FD SeqVentasFile.
        01 SeqVentaRecord.
           88   EOF-Ventas VALUE HIGH-VALUES.
-          02 FILLER                      PIC X(20).
+          02 FILLER                      PIC X(26).
 
 
        FD ComercioFile.
