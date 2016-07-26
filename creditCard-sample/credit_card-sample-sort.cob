@@ -59,7 +59,7 @@
 
        FD Cupon3_file.
        01 Cupon3_Record.
-         88 EOF-CUPON-3 VALUE HIGH-VALUE.
+         88 EOF-CUPON-3                  VALUE HIGH-VALUE.
         03 C3-NRO-TARJ                   PIC 9(10).
         03 C3-NRO-CUPON                  PIC 9(5).
         03 C3-FECHA-COMPRA.
@@ -71,7 +71,7 @@
 
        FD SaldoFile.
        01 SaldoRecord.
-         88 EOF-SALDO VALUE HIGH-VALUE.
+         88 EOF-SALDO                    VALUE HIGH-VALUE.
          02 SALD-KEY.
            04 SALD-NRO-TARJ              PIC 9(10).
            04 SALD-FECHA                 PIC X(10).
@@ -79,7 +79,7 @@
 
        SD WorkFile.
        01 SortRecord.
-          88 EOF-WorkFile VALUE HIGH-VALUE.
+          88 EOF-WorkFile                VALUE HIGH-VALUE.
           02 sort-holder                 PIC X(30).
           02 sort-doc_num                PIC 9(11).
           02 sort-cc-num                 PIC 9(10).

@@ -27,6 +27,11 @@
           RECORD KEY IS LimiteVenta-key
           FILE STATUS IS LimiteVentaFS.
 
+          SELECT WorkFile ASSIGN TO "..\files\work_file.dat"
+          ORGANIZATION IS LINE SEQUENTIAL.
+
+          SELECT OutputReportFile ASSIGN TO "..\files\sales_report.dat"
+          ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.
        FILE SECTION.
@@ -70,6 +75,15 @@
            03 LimiteVenta-fecha-hasta    PIC 9(8).
          02 LimiteVenta-valor            PIC 9(6)V99.
 
+       SD WorkFile.
+       01 SortRecord.
+           88 WorkFile-EOF               VALUE HIGH-VALUE.
+         02 sort-key                     PIC X(6).
+         02 FILLER                       PIC X(64).
+
+       FD OutputReportFile.
+       01 OutputReportRecord.
+         02 FILLER                       PIC X(70).
 
        WORKING-STORAGE SECTION.
        01 VentasFS                       PIC X(2).
@@ -82,15 +96,94 @@
           88  commerce_ok                VALUE HIGH-VALUE.
           88  commerce_invalid           VALUE LOW-VALUE.
 
+       01 WS-CURRENT-DATE-FIELDS.
+        02 WS-DATE-YEAR                  PIC X(4).
+        02 WS-DATE-MONTH                 PIC X(2).
+        02 WS-DATE-DAY                   PIC X(2).
+        02 WS-TIME-HOUR                  PIC X(2).
+        02 WS-TIME-MINUTE                PIC X(2).
+
+       01 page_num                       PIC 9(2).
+
+       01 header_line_1.
+         02 FILLER                       PIC X(7) VALUE "Fecha: ".
+         02 header_line_date_day         PIC X(2).
+         02 FILLER                       PIC X(1) VALUE "/".
+         02 header_line_date_month       PIC X(2).
+         02 FILLER                       PIC X(1) VALUE "/".
+         02 header_line_date_year        PIC X(4).
+         02 FILLER                       PIC X(45) VALUE ALL SPACES.
+         02 FILLER                       PIC X(6) VALUE "Hoja: ".
+         02 header_line_page_num         PIC X(2).
+
+       01 header_line_2.
+         02 FILLER                       PIC X(70) VALUE
+         "           Total de Compras de los Comercios por Rubro".
+
+       01 header_line_3.
+         02 FILLER                       PIC X(70) VALUE
+         "           -------------------------------------------".
+
+       01 empty_line.
+         02 FILLER                       PIC X(70) VALUE ALL SPACES.
+
+
        PROCEDURE DIVISION.
 
        Main.
-           PERFORM Open_files.
+            SORT WorkFile ON DESCENDING KEY sort-key
+                              INPUT PROCEDURE IS Input_Process
+                              OUTPUT PROCEDURE IS Output_Process.
+
+
+           STOP RUN.
+       Input_Process SECTION.
+        PERFORM Open_files.
            PERFORM Read_files.
            PERFORM Load_tables.
            PERFORM Process_files.
            PERFORM Close_files.
-           STOP RUN.
+
+       EXIT SECTION.
+       Output_Process SECTION.
+         OPEN OUTPUT OutputReportFile.
+         INITIALIZE page_num.
+         PERFORM Print_header.
+
+         PERFORM Get_record_from_sort_file.
+
+         PERFORM UNTIL WorkFile-EOF
+
+            MOVE sort_rubro TO ws_rubro
+            PERFORM Copy_rubro_detals
+
+            PERFORM UNTIL sort-rubro <> ws_rubro
+            END-PERFORM
+
+            WRITE OutputReportRecord FROM SortRecord
+
+            PERFORM Get_record_from_sort_file
+         END-PERFORM.
+         CLOSE OutputReportFile.
+       EXIT SECTION.
+
+       Copy_rubro_detals.
+       *> To do...
+
+       Get_record_from_sort_file.
+          RETURN WorkFile AT END SET WorkFile-EOF TO TRUE.
+
+       Print_header.
+          ADD 1 TO page_num.
+          MOVE FUNCTION CURRENT-DATE TO WS-CURRENT-DATE-FIELDS.
+          MOVE WS-DATE-DAY TO header_line_date_day.
+          MOVE WS-DATE-MONTH TO header_line_date_month.
+          MOVE WS-DATE-YEAR TO header_line_date_year.
+          MOVE page_num TO header_line_page_num.
+          WRITE OutputReportRecord FROM header_line_1.
+          WRITE OutputReportRecord FROM empty_line.
+          WRITE OutPutReportRecord FROM header_line_2.
+          WRITE OutputReportRecord FROM header_line_3.
 
        Open_files.
          OPEN INPUT VentasFile.
@@ -170,10 +263,10 @@
              Ventas-fecha <= LimiteVenta-fecha-hasta THEN
 
              DISPLAY VentasRecord
+             MOVE VentasRecord TO SortRecord
+             RELEASE SortRecord
 
           END-IF.
-
-
 
        Get_limits.
           *> Set search filter
