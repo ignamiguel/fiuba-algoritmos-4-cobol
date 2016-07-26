@@ -23,7 +23,8 @@
           RECORD KEY IS Comercio-key
           FILE STATUS IS ComercioStatus.
 
-          SELECT SeqComercioFile ASSIGN TO "..\files\comercio-input.dat"
+          SELECT SeqComercioFile ASSIGN TO
+          "..\files\comercios-input.dat"
           ORGANIZATION IS LINE SEQUENTIAL.
 
           SELECT LimiteVentaFile ASSIGN TO
