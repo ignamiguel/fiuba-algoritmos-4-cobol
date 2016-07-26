@@ -20,5 +20,6 @@ In order to run it, it is necessary to install Open Cobol https://github.com/Ope
 3. How to leave a section before the end without a goto statement [http://stackoverflow.com/questions/26219494/how-to-leave-a-section-before-the-end-without-a-goto-statement](http://stackoverflow.com/questions/26219494/how-to-leave-a-section-before-the-end-without-a-goto-statement)
 
 
-### Formatting
+### Utils
 * [Suppress Leading Zeros in COBOL http://stackoverflow.com/questions/22725688/suppress-leading-zeros-in-cobol](http://stackoverflow.com/questions/22725688/suppress-leading-zeros-in-cobol)
+* [File Status codes](https://supportline.microfocus.com/documentation/books/sx20books/fhscod.htm)
