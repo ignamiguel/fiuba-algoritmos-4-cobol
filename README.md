@@ -22,4 +22,4 @@ In order to run it, it is necessary to install Open Cobol https://github.com/Ope
 
 ### Utils
 * [Suppress Leading Zeros in COBOL http://stackoverflow.com/questions/22725688/suppress-leading-zeros-in-cobol](http://stackoverflow.com/questions/22725688/suppress-leading-zeros-in-cobol)
-* [File Status codes](https://supportline.microfocus.com/documentation/books/sx20books/fhscod.htm)
+* [File Status codes https://supportline.microfocus.com/documentation/books/sx20books/fhscod.htm](https://supportline.microfocus.com/documentation/books/sx20books/fhscod.htm)
