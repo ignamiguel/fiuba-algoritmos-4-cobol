@@ -182,10 +182,10 @@
          02 FILLER                       PIC X(34).
 
        01 Report_holder_details_3.
-         02 FILLER                       PIC X(16)
-                                         VALUE "Saldo anterior: ".
-         02 cc_debt                      PIC 9(6)V99.
-         02 FILLER                       PIC X(36).
+         02 FILLER                       PIC X(17)
+                                         VALUE "Saldo anterior: $".
+         02 cc_debt                      PIC Z(5)9.99.
+         02 FILLER                       PIC X(35).
 
        01 Grid_border.
            03 FILLER                     PIC X(60) VALUE ALL "-".
@@ -208,23 +208,25 @@
            03 grid_cupon_date_y          PIC X(4).
          02 FILLER                       PIC X(14).
          02 FILLER                       PIC X(1) VALUE "|".
-         02 grid_amount                  PIC 9(6)V99.
-         02 FILLER                       PIC X(12).
+         02 FILLER                       PIC X(1) VALUE "$".
+         *>02 grid_amount                  PIC 9(6)V99.
+         02 grid_amount                  PIC Z(5)9.99.
+         02 FILLER                       PIC X(10).
          02 FILLER                       PIC X(1) VALUE "|".
 
        01 Report_footer_details_1.
-         02 FILLER                       PIC X(21) VALUE
-         "Total de la tarjeta: ".
+         02 FILLER                       PIC X(22) VALUE
+         "Total de la tarjeta: $".
          02 footer_subtotal              PIC Z(8)9.99.
-         02 FILLER                       PIC X(27).
+         02 FILLER                       PIC X(26).
 
        01 aux_subtotal                   PIC 9(10)V99.
 
        01 Report_footer_details_2.
-         02 FILLER                       PIC X(13) VALUE
-         "Saldo final: ".
+         02 FILLER                       PIC X(14) VALUE
+         "Saldo final: $".
          02 footer_total                 PIC Z(9)9.99.
-         02 FILLER                       PIC X(35).
+         02 FILLER                       PIC X(34).
 
        PROCEDURE DIVISION.
        Begin.
@@ -363,7 +365,14 @@
            MOVE aux_subtotal TO footer_total.
            WRITE ReportRecord FROM Report_footer_details_2.
            WRITE ReportRecord FROM Empty_line.
-           WRITE ReportRecord FROM Grid_border.
+           PERFORM Print_NewLine.
+
+       Print_NewLine.
+          MOVE
+       "---------------------- Salto de linea ----------------------"
+       TO ReportLine.
+          WRITE ReportRecord FROM ReportLine.
+          WRITE ReportRecord FROM Empty_line.
 
        Open_All_Files.
           OPEN INPUT SaldoFile.
