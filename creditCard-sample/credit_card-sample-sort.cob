@@ -73,16 +73,16 @@
        01 SaldoRecord.
          88 EOF-SALDO VALUE HIGH-VALUE.
          02 SALD-KEY.
-           04 SALD-NRO-TARJ            PIC 9(10).
-           04 SALD-FECHA               PIC X(10).
+           04 SALD-NRO-TARJ              PIC 9(10).
+           04 SALD-FECHA                 PIC X(10).
          02 SALD-IMPORTE                 PIC 9(6)V99.
 
        SD WorkFile.
        01 SortRecord.
           88 EOF-WorkFile VALUE HIGH-VALUE.
-          02 sort-titular                PIC X(30).
-          02 sort-documento              PIC 9(11).
-          02 sort-nro-tarjeta            PIC 9(10).
+          02 sort-holder                 PIC X(30).
+          02 sort-doc_num                PIC 9(11).
+          02 sort-cc-num                 PIC 9(10).
           *>02 sort-saldo                PIC Z(3),Z(2)9V99.
           02 sort-saldo                  PIC 9(6)V99.
           02 sort-nro-cupon              PIC 9(5).
@@ -141,7 +141,7 @@
           02 FILLER                      PIC X(58).
           02 ReportPage                  PIC X(02).
 
-       01 Report_page_num                PIC 9(2).
+       01 Report_page_num                PIC 9(2) VALUE 0.
 
         01  WS-CURRENT-DATE-FIELDS.
            05  WS-CURRENT-DATE.
@@ -169,9 +169,66 @@
 
        01 ws-titular                     PIC X(30).
 
+       01 Report_holder_details_1.
+         02 FILLER                       PIC X(9) VALUE "Titular: ".
+         02 cc_holder_name               PIC X(29).
+         02 FILLER                       PIC X(11) VALUE "Documento: ".
+         02 cc_holder_doc                PIC X(11).
+
+       01 Report_holder_details_2.
+         02 FILLER                       PIC X(16)
+                                         VALUE "Nro de tarjeta: ".
+         02 cc_holder_num                PIC X(10).
+         02 FILLER                       PIC X(34).
+
+       01 Report_holder_details_3.
+         02 FILLER                       PIC X(16)
+                                         VALUE "Saldo anterior: ".
+         02 cc_debt                      PIC 9(6)V99.
+         02 FILLER                       PIC X(36).
+
+       01 Grid_border.
+           03 FILLER                     PIC X(60) VALUE ALL "-".
+
+       01 Grid_headers.
+         02 FILLER                       PIC X(60)
+                                         VALUE
+         "| Nro Cupon  |      Fecha Compra      |     Importe        |".
+
+       01 Grid_content.
+         02 FILLER                       PIC X(1) VALUE "|".
+         02 grid_cupon_num               PIC X(5).
+         02 FILLER                       PIC X(7).
+         02 FILLER                       PIC X(1) VALUE "|".
+         02 grid_cupon_date.
+           03 grid_cupon_date_d          PIC X(2).
+           03 FILLER                     PIC X(1) VALUE "/".
+           03 grid_cupon_date_m          PIC X(2).
+           03 FILLER                     PIC X(1) VALUE "/".
+           03 grid_cupon_date_y          PIC X(2).
+         02 FILLER                       PIC X(16).
+         02 FILLER                       PIC X(1) VALUE "|".
+         02 grid_amount                  PIC 9(6)V99.
+         02 FILLER                       PIC X(12).
+         02 FILLER                       PIC X(1) VALUE "|".
+
+       01 Report_footer_details_1.
+         02 FILLER                       PIC X(21) VALUE
+         "Total de la tarjeta: ".
+         02 footer_subtotal              PIC Z(8)9.99.
+         02 FILLER                       PIC X(27).
+
+       01 aux_subtotal                   PIC 9(10)V99.
+
+       01 Report_footer_details_2.
+         02 FILLER                       PIC X(13) VALUE
+         "Saldo final: ".
+         02 footer_total                 PIC Z(9)9.99.
+         02 FILLER                       PIC X(35).
+
        PROCEDURE DIVISION.
        Begin.
-          SORT WorkFile ON ASCENDING KEY sort-titular
+          SORT WorkFile ON ASCENDING KEY sort-holder
                               INPUT PROCEDURE IS Input_Process
                               OUTPUT PROCEDURE IS Output_Process.
 
@@ -188,7 +245,8 @@
        Output_Process SECTION.
          OPEN OUTPUT ReportFile.
          *> Set Report_page_num to zero
-         INITIALIZE Report_page_num.
+         *>INITIALIZE Report_page_num.
+         ADD 1 TO Report_page_num.
 
          PERFORM Get_record_from_sort_file.
 
@@ -199,9 +257,39 @@
            PERFORM Print_first_section
 
            *> Process all record for cc holder
-           WRITE ReportRecord FROM SortRecord
+           *> backup key
+           MOVE sort-holder TO ws-titular
 
-           PERFORM Get_record_from_sort_file
+           *> Print holder's details
+           MOVE sort-holder TO cc_holder_name
+           MOVE sort-doc_num TO cc_holder_doc
+           WRITE ReportRecord FROM Report_holder_details_1
+           MOVE sort-cc-num TO cc_holder_num
+           WRITE ReportRecord FROM Report_holder_details_2
+
+           *> Print holder's debt
+           MOVE sort-saldo TO cc_debt
+           WRITE ReportRecord FROM Report_holder_details_3
+           WRITE ReportRecord FROM Empty_line
+
+           PERFORM Print_grid_headers
+
+           *> Set total amount to zero
+           INITIALIZE WS-total-amount
+
+           PERFORM UNTIL ws-titular <> sort-holder
+             PERFORM Print_cupon_detail
+
+            COMPUTE sort-importe = FUNCTION NUMVAL(sort-importe)
+            END-COMPUTE
+
+
+             ADD sort-importe TO WS-total-amount
+             PERFORM Get_record_from_sort_file
+           END-PERFORM
+
+           PERFORM Print_grid_footer
+           PERFORM Print_total_amount
 
            ADD 1 TO Report_page_num
 
@@ -236,7 +324,40 @@
           MOVE "                       LISTA DE CUPONES"
        TO ReportLine.
 
-       WRITE ReportRecord FROM ReportLine.
+         WRITE ReportRecord FROM ReportLine.
+         WRITE ReportRecord FROM Empty_line.
+
+       Print_grid_headers.
+           WRITE ReportRecord FROM Grid_border.
+           WRITE ReportRecord FROM Grid_headers.
+           WRITE ReportRecord FROM Grid_border.
+
+       Print_cupon_detail.
+          MOVE sort-nro-cupon TO grid_cupon_num.
+          MOVE sort-fecha-DAY TO grid_cupon_date_d.
+          MOVE sort-fecha-MONTH TO grid_cupon_date_m.
+          MOVE sort-fecha-YEAR TO grid_cupon_date_y.
+          MOVE sort-importe TO grid_amount.
+
+          WRITE ReportRecord FROM Grid_content.
+
+       Print_grid_footer.
+          WRITE ReportRecord FROM Grid_border.
+          WRITE ReportRecord FROM Empty_line.
+
+       Print_total_amount.
+           ADD WS-total-amount TO aux_subtotal.
+           MOVE aux_subtotal TO footer_subtotal.
+           WRITE ReportRecord FROM Report_footer_details_1.
+
+           COMPUTE WS-total-amount = FUNCTION NUMVAL(sort-saldo)
+           END-COMPUTE.
+           ADD WS-total-amount TO aux_subtotal.
+
+           MOVE aux_subtotal TO footer_total.
+           WRITE ReportRecord FROM Report_footer_details_2.
+           WRITE ReportRecord FROM Empty_line.
+           WRITE ReportRecord FROM Grid_border.
 
        Open_All_Files.
           OPEN INPUT SaldoFile.
@@ -437,9 +558,9 @@
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Copy_CreditCard_Details.
-        MOVE TJ-TITULAR TO sort-titular.
-        MOVE TJ-DOCUMENTO TO sort-documento.
-        MOVE TJ-NRO-TARJ TO sort-nro-tarjeta.
+        MOVE TJ-TITULAR TO sort-holder.
+        MOVE TJ-DOCUMENTO TO sort-doc_num.
+        MOVE TJ-NRO-TARJ TO sort-cc-num.
 
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
