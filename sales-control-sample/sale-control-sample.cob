@@ -61,7 +61,6 @@
          02 Rubro-codigo                 PIC 9(4).
          02 Rubro-descripcion            PIC X(30).
          02 Rubro-descuento              PIC 9(2).
-         02 Rubro-descuento              PIC 9(2).
          02 Rubro-campo2                 PIC 9(2).
          02 Rubro-campo3                 PIC 9(2).
          02 Rubro-campo4                 PIC 9(2).
@@ -78,7 +77,12 @@
        SD WorkFile.
        01 SortRecord.
            88 WorkFile-EOF               VALUE HIGH-VALUE.
-         02 sort-key                     PIC X(6).
+         02 sort-key.
+           03 sort-rubro-code            PIC X(6).
+         02 sort-comercio                PIC X(6).
+         02 sort-moneda                  PIC X(1).
+         02 sort-importe                 PIC 9(6)V99.
+
          02 FILLER                       PIC X(64).
 
        FD OutputReportFile.
@@ -97,14 +101,15 @@
           88  commerce_invalid           VALUE LOW-VALUE.
 
        01 Rubros_table.
-         02 Rubros_element OCCURS 3 TIMES INDEXED BY I.
-           03 rubros_code                PIC 9(4).
-           03 rubros_description         PIC X(30).
-           03 rubros_scount              PIC X(2).
-           03 rubros_campo2              PIC X(2).
-           03 rubros_campo3              PIC X(2).
-           03 rubros_campo4              PIC X(2).
+         02 Rubros_array OCCURS 3 TIMES INDEXED BY I.
+           03 rubros_table_code          PIC 9(4).
+           03 rubros_table_desc          PIC X(30).
+           03 rubros_table_scount        PIC X(2).
+           03 rubros_table_campo2        PIC X(2).
+           03 rubros_table_campo3        PIC X(2).
+           03 rubros_table_campo4        PIC X(2).
 
+       01 ws-rubro                       PIC X(4).
 
        01 WS-CURRENT-DATE-FIELDS.
         02 WS-DATE-YEAR                  PIC X(4).
@@ -138,6 +143,7 @@
          02 FILLER                       PIC X(70) VALUE ALL SPACES.
 
 
+
        PROCEDURE DIVISION.
 
        Main.
@@ -164,10 +170,11 @@
 
          PERFORM UNTIL WorkFile-EOF
 
-            MOVE sort_rubro TO ws_rubro
-            PERFORM Copy_rubro_detals
+            MOVE sort-rubro-code TO ws-rubro
 
-            PERFORM UNTIL sort-rubro <> ws_rubro
+            PERFORM Write_rubro_details
+
+            PERFORM UNTIL sort-rubro-code <> ws-rubro
             END-PERFORM
 
             WRITE OutputReportRecord FROM SortRecord
@@ -177,8 +184,19 @@
          CLOSE OutputReportFile.
        EXIT SECTION.
 
-       Copy_rubro_detals.
-       *> To do...
+       Write_rubro_details.
+
+           SET I TO 1.
+           SEARCH Rubros_array
+               AT END DISPLAY 'NOT FOUND IN Rubros array'
+            WHEN Rubros_array(I) = ws-rubro
+
+               DISPLAY 'Rubro encontrado'
+            END-SEARCH.
+
+
+
+           *>WRITE OutputReportRecord FROM rubro_details_line_1.
 
        Get_record_from_sort_file.
           RETURN WorkFile AT END SET WorkFile-EOF TO TRUE.
@@ -218,7 +236,22 @@
           END-READ.
 
        Load_tables.
-       *> To do...
+       *> Initialize table index to 1
+       *> Cobol arrays starts at 1
+          SET I TO 1.
+          PERFORM UNTIL Rubros-EOF
+             MOVE Rubro-codigo TO rubros_table_code(I)
+             MOVE Rubro-descripcion TO rubros_table_desc(I)
+             MOVE Rubro-descuento TO rubros_table_scount(I)
+             MOVE Rubro-campo2 TO rubros_table_campo2(I)
+             MOVE Rubro-campo3 TO rubros_table_campo3(I)
+             MOVE Rubro-campo4 TO rubros_table_campo4(I)
+
+             READ RubrosFile NEXT RECORD
+                AT END SET Rubros-EOF TO TRUE
+             END-READ
+
+          END-PERFORM.
 
        Process_files.
           PERFORM UNTIL Ventas-EOF
@@ -274,6 +307,8 @@
 
              DISPLAY VentasRecord
              MOVE VentasRecord TO SortRecord
+
+             *> Sent to sort file (work file)
              RELEASE SortRecord
 
           END-IF.
