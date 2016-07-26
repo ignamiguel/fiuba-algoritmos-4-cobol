@@ -96,6 +96,16 @@
           88  commerce_ok                VALUE HIGH-VALUE.
           88  commerce_invalid           VALUE LOW-VALUE.
 
+       01 Rubros_table.
+         02 Rubros_element OCCURS 3 TIMES INDEXED BY I.
+           03 rubros_code                PIC 9(4).
+           03 rubros_description         PIC X(30).
+           03 rubros_scount              PIC X(2).
+           03 rubros_campo2              PIC X(2).
+           03 rubros_campo3              PIC X(2).
+           03 rubros_campo4              PIC X(2).
+
+
        01 WS-CURRENT-DATE-FIELDS.
         02 WS-DATE-YEAR                  PIC X(4).
         02 WS-DATE-MONTH                 PIC X(2).
