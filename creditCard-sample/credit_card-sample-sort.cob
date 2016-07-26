@@ -26,6 +26,10 @@
           SELECT WorkFile ASSIGN TO "..\files\workfile.dat"
           ORGANIZATION IS LINE SEQUENTIAL.
 
+          *> Output
+          SELECT ReportFile ASSIGN TO "..\files\cc_report.dat"
+          ORGANIZATION IS LINE SEQUENTIAL.
+
        DATA DIVISION.
        FILE SECTION.
 
@@ -73,19 +77,31 @@
            04 SALD-FECHA               PIC X(10).
          02 SALD-IMPORTE             PIC 9(6)V99.
 
-       SD WorfFile.
-       01 WorkRecord.
-          02 sort-titular           PIC X(30).
-          02 sort-documento         PIC 9(11).
-          02 sort-nro-tarjeta       PIC 9(10).
-          02 sort-saldo             PIC Z(3),Z(2)9V99.
+       SD WorkFile.
+       01 SortRecord.
+          88 EOF-WorkFile VALUE HIGH-VALUE.
+          02 sort-titular            PIC X(30).
+          02 sort-documento          PIC 9(11).
+          02 sort-nro-tarjeta        PIC 9(10).
+          *>02 sort-saldo             PIC Z(3),Z(2)9V99.
+          02 sort-saldo              PIC 9(6)V99.
+          02 sort-nro-cupon          PIC 9(5).
+          02 sort-fecha.
+             06 sort-fecha-FILLER    PIC X(2).
+             06 sort-fecha-DAY       PIC X(2).
+             06 sort-fecha-MONTH     PIC X(2).
+             06 sort-fecha-YEAR      PIC X(4).
+          02 sort-importe            PIC 9(6)V99.
 
-
-
+       FD ReportFile.
+       01 ReportRecord               PIC X(60).
 
        WORKING-STORAGE SECTION.
        *> WS prefix stands for "working storage"
        01   SaldoStatus              PIC X(2).
+           88 SaldoSuccess   VALUE "00".
+           88 SaldoNotFound  VALUE "23".
+
        01   TarjetaStatus            PIC X(2).
        01   WS-CreditCardValid       PIC X(1).
           88 CC-VALID VALUE HIGH-VALUE.
@@ -98,7 +114,7 @@
        01 Cupon_Record.
         03 WS-nro-tarjeta            PIC 9(10).
         03 WS-NRO-CUPON              PIC 9(5).
-        03 WS-C1-FECHA-COMPRA.
+        03 WS-FECHA-COMPRA.
           06 WS-FILLER            PIC X(2).
           06 WS-DAY               PIC X(2).
           06 WS-MONTH             PIC X(2).
@@ -123,19 +139,37 @@
 
        PROCEDURE DIVISION.
        Begin.
-          SORT WorkFile ON ASCENDING KEY ORD-EMP-RAZON
-                                 ASCENDING KEY ORD-TIM-FECHA
-                                 ASCENDING KEY ORD-CONS-NOMBRE
-                              INPUT PROCEDURE IS ENTRADA
-                              OUTPUT PROCEDURE IS SALIDA.
+          SORT WorkFile ON ASCENDING KEY sort-titular
+                              INPUT PROCEDURE IS Input_Process
+                              OUTPUT PROCEDURE IS Output_Process.
 
+
+          STOP RUN.
+      *-----------------------------------------------------------*
+      *-----------------------------------------------------------*
+       Input_Process SECTION.
           PERFORM Open_All_Files.
           PERFORM Read_Sequential_Files.
           PERFORM Process_All_Files.
           PERFORM Close_All_Files.
-          STOP RUN.
-      *-----------------------------------------------------------*
-      *-----------------------------------------------------------*
+
+       Output_Process SECTION.
+         OPEN OUTPUT ReportFile.
+
+         PERFORM Get_record_from_sort_file.
+
+         PERFORM UNTIL EOF-WorkFile
+
+           WRITE ReportRecord FROM SortRecord
+
+           PERFORM Get_record_from_sort_file
+
+         END-PERFORM.
+         CLOSE ReportFile.
+
+       Get_record_from_sort_file.
+         RETURN WorkFile AT END SET EOF-WorkFile TO TRUE.
+
        Open_All_Files.
           OPEN INPUT SaldoFile.
           OPEN INPUT Cupon1_file.
@@ -193,10 +227,10 @@
 
           IF CC-VALID
                 DISPLAY "VALID CC"
-                PERFORM Print_CreditCard_Details
-                PERFORM Print_Saldo
+                PERFORM Copy_CreditCard_Details
+                PERFORM Copy_Saldo
                 PERFORM Process_All_Cupons_For_CC
-                PERFORM Print_Amounts
+                *>PERFORM Print_Amounts
           ELSE
                 DISPLAY "INVALID CC"
                 PERFORM Move_to_Next_CC
@@ -215,16 +249,12 @@
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Process_All_Cupons_For_CC.
-         DISPLAY "------------------------------------".
-         DISPLAY "Cupones".
          MOVE 1 TO WS-cupon-counter.
          MOVE 0 TO WS-total-amount.
 
          PERFORM Process_CuponFile_1.
          PERFORM Process_CuponFile_2.
          PERFORM Process_CuponFile_3.
-
-         DISPLAY "------------------------------------".
 
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
@@ -233,7 +263,10 @@
          PERFORM UNTIL C1-NRO-TARJ <> WS-CC-Key
 
             MOVE Cupon1_Record TO Cupon_Record
-            PERFORM Print_Cupon_Details
+            PERFORM Copy_Cupon_Details
+
+            *> Send record to work (sort) file
+            RELEASE SortRecord
 
             MOVE C1-IMPORTE TO WS-C1-IMPORTE
             COMPUTE WS-C1-IMPORTE = FUNCTION NUMVAL(WS-C1-IMPORTE)
@@ -255,7 +288,10 @@
          PERFORM UNTIL C2-NRO-TARJ <> WS-CC-Key
 
             MOVE Cupon2_Record TO Cupon_Record
-            PERFORM Print_Cupon_Details
+            PERFORM Copy_Cupon_Details
+
+            *> Send record to work (sort) file
+            RELEASE SortRecord
 
             MOVE C2-IMPORTE TO WS-C1-IMPORTE
             COMPUTE WS-C1-IMPORTE = FUNCTION NUMVAL(WS-C1-IMPORTE)
@@ -276,7 +312,10 @@
          PERFORM UNTIL C3-NRO-TARJ <> WS-CC-Key
 
             MOVE Cupon3_Record TO Cupon_Record
-            PERFORM Print_Cupon_Details
+            PERFORM Copy_Cupon_Details
+
+            *> Send record to work (sort) file
+            RELEASE SortRecord
 
             MOVE C3-IMPORTE TO WS-C1-IMPORTE
             COMPUTE WS-C1-IMPORTE = FUNCTION NUMVAL(WS-C1-IMPORTE)
@@ -292,11 +331,10 @@
          END-PERFORM.
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
-       Print_Cupon_Details.
-         DISPLAY "[" WS-cupon-counter "]".
-         DISPLAY "   Nro Cupon: " WS-NRO-CUPON.
-         DISPLAY "   Fecha compra: " WS-DAY "/" WS-MONTH "/"WS-YEAR.
-         DISPLAY "   Importe: " WS-IMPORTE.
+       Copy_Cupon_Details.
+         MOVE WS-NRO-CUPON TO sort-nro-cupon.
+         MOVE WS-FECHA-COMPRA TO sort-fecha.
+         MOVE WS-IMPORTE TO sort-importe.
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Move_to_Next_CC.
@@ -330,17 +368,15 @@
 
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
-       Print_CreditCard_Details.
-        DISPLAY "------------------------------------".
-        DISPLAY "CC Details ->".
-        DISPLAY "             Titular: " TJ-TITULAR.
-        DISPLAY "             Documento: " TJ-DOCUMENTO.
-        DISPLAY "             Nro Tarjeta: " TJ-NRO-TARJ.
-        DISPLAY "------------------------------------".
+       Copy_CreditCard_Details.
+        MOVE TJ-TITULAR TO sort-titular.
+        MOVE TJ-DOCUMENTO TO sort-documento.
+        MOVE TJ-NRO-TARJ TO sort-nro-tarjeta.
+
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
-       Print_Saldo.
-         DISPLAY "------------------------------------".
+       Copy_Saldo.
+
          MOVE WS-CC-Key TO SALD-NRO-TARJ.
          MOVE "  10062016" TO SALD-FECHA.
 
@@ -349,17 +385,17 @@
           *>NOT INVALID KEY DISPLAY "Saldo Pointer Updated :- "SaldoStatus
          END-START.
 
-        IF SaldoStatus = "00"
+        IF SaldoSuccess
            READ SaldoFile NEXT RECORD
               AT END SET EOF-SALDO TO TRUE
            END-READ
            MOVE SALD-IMPORTE TO WS-Saldo-amount
-           DISPLAY "Saldo anterior: " WS-Saldo-amount
+           MOVE WS-Saldo-amount TO sort-saldo
         ELSE
            MOVE 0 TO WS-Saldo-amount
-           DISPLAY "Saldo anterior: 0.00"
+           MOVE WS-Saldo-amount TO sort-saldo
         END-IF.
-        DISPLAY "------------------------------------".
+
       *-----------------------------------------------------------*
       *-----------------------------------------------------------*
        Close_All_Files.
