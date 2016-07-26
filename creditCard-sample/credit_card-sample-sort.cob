@@ -166,6 +166,7 @@
 
          END-PERFORM.
          CLOSE ReportFile.
+       EXIT SECTION.
 
        Get_record_from_sort_file.
          RETURN WorkFile AT END SET EOF-WorkFile TO TRUE.
